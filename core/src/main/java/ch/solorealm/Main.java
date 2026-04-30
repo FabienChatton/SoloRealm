@@ -1,5 +1,8 @@
 package ch.solorealm;
 
+import ch.solorealm.actors.ActorCard;
+import ch.solorealm.beans.CopperIngredient;
+import ch.solorealm.beans.IngredientType;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
@@ -20,28 +23,12 @@ public class Main extends ApplicationAdapter {
 
     @Override
     public void create() {
-        stage = new Stage(new FitViewport(640, 480));
+        stage = new Stage(new FitViewport(1488, 837));
         skin = new Skin(Gdx.files.internal("ui/uiskin.json"));
 
-        Window window = new Window("Example screen", skin, "border");
-        window.defaults().pad(4f);
-        window.add("This is a simple Scene2D view.").row();
-        final TextButton button = new TextButton("Click me!", skin);
-        button.pad(8f);
-        button.addListener(new ChangeListener() {
-            @Override
-            public void changed(final ChangeEvent event, final Actor actor) {
-                button.setText("Clicked.");
-            }
-        });
-        window.add(button);
-        window.pack();
-        // We round the window position to avoid awkward half-pixel artifacts.
-        // Casting using (int) would also work.
-        window.setPosition(MathUtils.roundPositive(stage.getWidth() / 2f - window.getWidth() / 2f),
-            MathUtils.roundPositive(stage.getHeight() / 2f - window.getHeight() / 2f));
-        window.addAction(Actions.sequence(Actions.alpha(0f), Actions.fadeIn(1f)));
-        stage.addActor(window);
+        ActorCard testActor = new ActorCard(new CopperIngredient(IngredientType.INGOT));
+
+        stage.addActor(testActor);
         Gdx.input.setInputProcessor(stage);
     }
 
