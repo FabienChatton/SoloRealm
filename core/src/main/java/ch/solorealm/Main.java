@@ -5,14 +5,9 @@ import ch.solorealm.beans.CopperIngredient;
 import ch.solorealm.beans.IngredientType;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.ui.Window;
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
@@ -26,9 +21,10 @@ public class Main extends ApplicationAdapter {
         stage = new Stage(new FitViewport(1488, 837));
         skin = new Skin(Gdx.files.internal("ui/uiskin.json"));
 
-        ActorCard testActor = new ActorCard(new CopperIngredient(IngredientType.INGOT));
+        ActorCard testActor = new ActorCard(new CopperIngredient(IngredientType.INGOT), new Texture("cards/empty_card.png"));
 
         stage.addActor(testActor);
+        stage.setDebugAll(true);
         Gdx.input.setInputProcessor(stage);
     }
 
