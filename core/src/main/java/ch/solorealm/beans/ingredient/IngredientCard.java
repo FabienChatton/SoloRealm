@@ -1,6 +1,8 @@
-package ch.solorealm.beans;
+package ch.solorealm.beans.ingredient;
 
-public abstract class IngredientCard {
+import ch.solorealm.beans.GetAssetResource;
+
+public abstract class IngredientCard implements GetAssetResource {
     private final IngredientMaterial ingredientMaterial;
     protected IngredientType ingredientType;
 
@@ -9,6 +11,7 @@ public abstract class IngredientCard {
         this.ingredientMaterial = ingredientMaterial;
     }
 
+    @Override
     public String getAssetName() {
         return String.format("ingredients/%s_%s.png", ingredientMaterial.toString(), ingredientType.toString()).toLowerCase();
     }

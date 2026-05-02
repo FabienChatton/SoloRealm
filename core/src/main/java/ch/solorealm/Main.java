@@ -1,10 +1,13 @@
 package ch.solorealm;
 
-import ch.solorealm.actors.ActorCard;
-import ch.solorealm.beans.CopperIngredient;
-import ch.solorealm.beans.IngredientType;
+import ch.solorealm.actors.ActorIngredientCard;
+import ch.solorealm.actors.ActorMachineCard;
+import ch.solorealm.beans.ingredient.CopperIngredient;
+import ch.solorealm.beans.ingredient.IngredientType;
+import ch.solorealm.beans.machine.FurnaceMachine;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -19,11 +22,26 @@ public class Main extends ApplicationAdapter {
     @Override
     public void create() {
         stage = new Stage(new FitViewport(1488, 837));
+
+        AssetManager assetManager = new AssetManager();
+        assetManager.load("cards/empty_card.png", Texture.class);
+        assetManager.load("ingredients/copper_ingot.png", Texture.class);
+        assetManager.load("machines/furnace.png", Texture.class);
+        assetManager.load("machines/Grid_Overclocker_Upgrade.png", Texture.class);
+        assetManager.finishLoading();
+
         skin = new Skin(Gdx.files.internal("ui/uiskin.json"));
 
-        ActorCard testActor = new ActorCard(new CopperIngredient(IngredientType.INGOT), new Texture("cards/empty_card.png"));
+        CopperIngredient copperData = new CopperIngredient(IngredientType.INGOT);
+        ActorIngredientCard testActor = new ActorIngredientCard(copperData, assetManager.get(copperData.getAssetName()), assetManager.get("cards/empty_card.png"));
+
+        FurnaceMachine furnaceData = new FurnaceMachine();
+        ActorMachineCard actorMachineCard = new ActorMachineCard(furnaceData, assetManager.get(furnaceData.getAssetName()), assetManager.get("cards/empty_card.png"), assetManager.get("machines/Grid_Overclocker_Upgrade.png"));
+
+        actorMachineCard.setPosition(testActor.getWidth(), 0);
 
         stage.addActor(testActor);
+        stage.addActor(actorMachineCard);
         stage.setDebugAll(true);
         Gdx.input.setInputProcessor(stage);
     }

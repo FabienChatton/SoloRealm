@@ -1,4 +1,4 @@
-package ch.solorealm.beans;
+package ch.solorealm.beans.ingredient;
 
 public enum IngredientType {
     ORE,

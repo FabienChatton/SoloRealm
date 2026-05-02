@@ -1,20 +1,20 @@
 package ch.solorealm.actors;
 
-import ch.solorealm.beans.IngredientCard;
+import ch.solorealm.beans.ingredient.IngredientCard;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 
-public class ActorCard extends Table {
+public class ActorIngredientCard extends Table {
     public final IngredientCard data;
     private final Image backgroundImage;
     private final Image icon;
 
-    public ActorCard(IngredientCard data, Texture backgroundTexture) {
+    public ActorIngredientCard(IngredientCard data, Texture iconTexture, Texture backgroundTexture) {
         this.data = data;
         this.backgroundImage = new Image(backgroundTexture);
-        this.icon = new Image(new Texture(data.getAssetName()));
+        this.icon = new Image(iconTexture);
 
         setTransform(true);
         setScale(1.5f);
