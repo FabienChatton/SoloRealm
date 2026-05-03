@@ -1,23 +1,15 @@
 package ch.solorealm.beans.machine;
 
 import ch.solorealm.beans.GetAssetResource;
-import ch.solorealm.beans.ingredient.IngredientCard;
-import ch.solorealm.beans.ingredient.IngredientType;
 
 public abstract class MachineNode implements GetAssetResource {
-    private IngredientCard input;
-    private IngredientCard output;
-    private MachineNode parent;
+    public final MachineEdge[] edges;
 
-    private final IngredientType inputType;
-    private final IngredientType outputType;
-
-    public MachineNode(IngredientType inputType, IngredientType outputType) {
-        this.inputType = inputType;
-        this.outputType = outputType;
+    public MachineNode(MachineEdge[] edges) {
+        this.edges = edges;
     }
 
-    protected abstract String getMachineName();
+    public abstract String getMachineName();
 
     @Override
     public String getAssetName() {

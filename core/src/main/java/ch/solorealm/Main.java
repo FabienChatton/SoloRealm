@@ -36,7 +36,7 @@ public class Main extends ApplicationAdapter {
         ActorIngredientCard testActor = new ActorIngredientCard(copperData, assetManager.get(copperData.getAssetName()), assetManager.get("cards/empty_card.png"));
 
         FurnaceMachine furnaceData = new FurnaceMachine();
-        ActorMachineCard actorMachineCard = new ActorMachineCard(furnaceData, assetManager.get(furnaceData.getAssetName()), assetManager.get("cards/empty_card.png"), assetManager.get("machines/Grid_Overclocker_Upgrade.png"));
+        ActorMachineCard actorMachineCard = new ActorMachineCard(skin, furnaceData, assetManager.get(furnaceData.getAssetName()), assetManager.get("cards/empty_card.png"), assetManager.get("machines/Grid_Overclocker_Upgrade.png"));
 
         actorMachineCard.setPosition(testActor.getWidth(), 0);
 

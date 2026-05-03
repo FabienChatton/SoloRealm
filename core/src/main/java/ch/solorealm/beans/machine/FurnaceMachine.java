@@ -4,11 +4,11 @@ import ch.solorealm.beans.ingredient.IngredientType;
 
 public class FurnaceMachine extends MachineNode {
     public FurnaceMachine() {
-        super(IngredientType.ORE, IngredientType.INGOT);
+        super(new MachineEdge[]{new MachineEdge(IngredientType.ORE, IngredientType.INGOT)});
     }
 
     @Override
-    protected String getMachineName() {
+    public String getMachineName() {
         return "furnace";
     }
 }
