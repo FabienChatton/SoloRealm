@@ -6,7 +6,6 @@ import ch.solorealm.beans.ingredient.IngredientType;
 public class MachineEdge {
     private IngredientCard input;
     private IngredientCard output;
-    private MachineEdge parent;
 
     public final IngredientType inputType;
     public final IngredientType outputType;

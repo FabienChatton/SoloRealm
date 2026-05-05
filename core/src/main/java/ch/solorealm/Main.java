@@ -2,6 +2,7 @@ package ch.solorealm;
 
 import ch.solorealm.actors.ActorIngredientCard;
 import ch.solorealm.actors.ActorMachineCard;
+import ch.solorealm.beans.Tableau;
 import ch.solorealm.beans.ingredient.CopperIngredient;
 import ch.solorealm.beans.ingredient.IngredientType;
 import ch.solorealm.beans.machine.FurnaceMachine;
@@ -32,10 +33,13 @@ public class Main extends ApplicationAdapter {
 
         skin = new Skin(Gdx.files.internal("ui/uiskin.json"));
 
+        Tableau tableau = new Tableau(6);
+
         CopperIngredient copperData = new CopperIngredient(IngredientType.INGOT);
         ActorIngredientCard testActor = new ActorIngredientCard(copperData, assetManager.get(copperData.getAssetName()), assetManager.get("cards/empty_card.png"));
 
         FurnaceMachine furnaceData = new FurnaceMachine();
+        furnaceData.setParent(tableau.rootNodes[0]);
         ActorMachineCard actorMachineCard = new ActorMachineCard(skin, furnaceData, assetManager.get(furnaceData.getAssetName()), assetManager.get("cards/empty_card.png"), assetManager.get("machines/Grid_Overclocker_Upgrade.png"));
 
         actorMachineCard.setPosition(testActor.getWidth(), 0);
