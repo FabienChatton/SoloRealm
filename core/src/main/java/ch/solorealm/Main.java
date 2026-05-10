@@ -2,6 +2,7 @@ package ch.solorealm;
 
 import ch.solorealm.actors.ActorIngredientCard;
 import ch.solorealm.actors.ActorMachineCard;
+import ch.solorealm.actors.TableauActor;
 import ch.solorealm.beans.Tableau;
 import ch.solorealm.beans.ingredient.CopperIngredient;
 import ch.solorealm.beans.ingredient.IngredientType;
@@ -29,6 +30,7 @@ public class Main extends ApplicationAdapter {
         assetManager.load("ingredients/copper_ingot.png", Texture.class);
         assetManager.load("machines/furnace.png", Texture.class);
         assetManager.load("machines/Grid_Overclocker_Upgrade.png", Texture.class);
+        assetManager.load("cards/empty_root.png", Texture.class);
         assetManager.finishLoading();
 
         skin = new Skin(Gdx.files.internal("ui/uiskin.json"));
@@ -42,11 +44,16 @@ public class Main extends ApplicationAdapter {
         furnaceData.setParent(tableau.rootNodes[0]);
         ActorMachineCard actorMachineCard = new ActorMachineCard(skin, furnaceData, assetManager.get(furnaceData.getAssetName()), assetManager.get("cards/empty_card.png"), assetManager.get("machines/Grid_Overclocker_Upgrade.png"));
 
-        actorMachineCard.setPosition(testActor.getWidth(), 0);
+        actorMachineCard.setPosition(1058.0f,328.5f);
 
+        TableauActor tableauActor = new TableauActor(tableau, skin, assetManager.get("cards/empty_root.png"));
+        tableauActor.setPosition(Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() / 2f);
+
+        stage.setDebugAll(true);
         stage.addActor(testActor);
         stage.addActor(actorMachineCard);
-        stage.setDebugAll(true);
+        stage.addActor(tableauActor);
+        actorMachineCard.toFront();
         Gdx.input.setInputProcessor(stage);
     }
 
