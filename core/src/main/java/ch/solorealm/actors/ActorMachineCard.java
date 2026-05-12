@@ -4,6 +4,7 @@ import ch.solorealm.beans.machine.MachineEdge;
 import ch.solorealm.beans.machine.MachineNode;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.utils.Align;
 
@@ -58,5 +59,13 @@ public class ActorMachineCard extends Table {
         contentTable.add(icon).size(64 * SCALE_FACTOR, 64 * SCALE_FACTOR).expandY().row();
         stack.add(contentTable);
         this.add(stack).width(scaledWidth).height(scaledHeight);
+    }
+
+    public void setParentActor(RootActor rootActor) {
+        data.setParent(rootActor.data);
+        rootActor.validate();
+        Vector2 stageCoordinate = rootActor.localToStageCoordinates(new Vector2(0, 0));
+        setPosition(stageCoordinate.x, stageCoordinate.y);
+        toFront();
     }
 }

@@ -2,8 +2,8 @@ package ch.solorealm;
 
 import ch.solorealm.actors.ActorIngredientCard;
 import ch.solorealm.actors.ActorMachineCard;
-import ch.solorealm.actors.TableauActor;
-import ch.solorealm.beans.Tableau;
+import ch.solorealm.actors.RootGridActor;
+import ch.solorealm.beans.RootGrid;
 import ch.solorealm.beans.ingredient.CopperIngredient;
 import ch.solorealm.beans.ingredient.IngredientType;
 import ch.solorealm.beans.machine.FurnaceMachine;
@@ -35,7 +35,7 @@ public class Main extends ApplicationAdapter {
 
         skin = new Skin(Gdx.files.internal("ui/uiskin.json"));
 
-        Tableau tableau = new Tableau(6);
+        RootGrid tableau = new RootGrid(6);
 
         CopperIngredient copperData = new CopperIngredient(IngredientType.INGOT);
         ActorIngredientCard testActor = new ActorIngredientCard(copperData, assetManager.get(copperData.getAssetName()), assetManager.get("cards/empty_card.png"));
@@ -46,14 +46,15 @@ public class Main extends ApplicationAdapter {
 
         actorMachineCard.setPosition(1058.0f,328.5f);
 
-        TableauActor tableauActor = new TableauActor(tableau, skin, assetManager.get("cards/empty_root.png"));
-        tableauActor.setPosition(Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() / 2f);
+        RootGridActor tableauActor = new RootGridActor(tableau, skin, assetManager.get("cards/empty_root.png"));
+        tableauActor.setPosition(500, 700);
+        tableauActor.validate();
 
         stage.setDebugAll(true);
         stage.addActor(testActor);
         stage.addActor(actorMachineCard);
         stage.addActor(tableauActor);
-        actorMachineCard.toFront();
+        actorMachineCard.setParentActor(tableauActor.rootActors[0]);
         Gdx.input.setInputProcessor(stage);
     }
 
