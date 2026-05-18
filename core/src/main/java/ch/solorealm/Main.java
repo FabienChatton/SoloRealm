@@ -12,6 +12,7 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -54,10 +55,25 @@ public class Main extends ApplicationAdapter {
         tableauActor.setPosition(500, 700);
         tableauActor.validate();
 
+        dnd.setDragTime(0);
+
         dnd.addSource(new DragAndDrop.Source(actorMachineCard) {
+            private final Vector2 originalPos = new Vector2();
             @Override
             public DragAndDrop.Payload dragStart(InputEvent event, float x, float y, int pointer) {
-                return new DragAndDrop.Payload();
+                DragAndDrop.Payload payload = new DragAndDrop.Payload();
+                payload.setDragActor(actorMachineCard);
+                dnd.setDragActorPosition(actorMachineCard.getWidth() - x, -y);
+                originalPos.set(actorMachineCard.getX(), actorMachineCard.getY());
+                return payload;
+            }
+
+            @Override
+            public void dragStop(InputEvent event, float x, float y, int pointer, DragAndDrop.Payload payload, DragAndDrop.Target target) {
+                super.dragStop(event, x, y, pointer, payload, target);
+                if (target == null) {
+                    dnd.getDragActor().setPosition(originalPos.x, originalPos.y);
+                }
             }
         });
 
