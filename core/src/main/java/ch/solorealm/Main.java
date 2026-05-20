@@ -1,101 +1,22 @@
 package ch.solorealm;
 
-import ch.solorealm.actors.ActorIngredientCard;
-import ch.solorealm.actors.ActorMachineCard;
-import ch.solorealm.actors.RootActor;
-import ch.solorealm.actors.RootGridActor;
-import ch.solorealm.beans.RootGrid;
-import ch.solorealm.beans.ingredient.CopperIngredient;
-import ch.solorealm.beans.ingredient.IngredientType;
-import ch.solorealm.beans.machine.FurnaceMachine;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends ApplicationAdapter {
     private Stage stage;
-    private Skin skin;
+    private Context context;
 
     @Override
     public void create() {
         stage = new Stage(new FitViewport(1488, 837));
-
-        AssetManager assetManager = new AssetManager();
-        assetManager.load("cards/empty_card.png", Texture.class);
-        assetManager.load("ingredients/copper_ingot.png", Texture.class);
-        assetManager.load("machines/furnace.png", Texture.class);
-        assetManager.load("machines/Grid_Overclocker_Upgrade.png", Texture.class);
-        assetManager.load("cards/empty_root.png", Texture.class);
-        assetManager.finishLoading();
-
-        skin = new Skin(Gdx.files.internal("ui/uiskin.json"));
-
-        RootGrid tableau = new RootGrid(6);
-
-        CopperIngredient copperData = new CopperIngredient(IngredientType.INGOT);
-        ActorIngredientCard testActor = new ActorIngredientCard(copperData, assetManager.get(copperData.getAssetName()), assetManager.get("cards/empty_card.png"));
-
-        DragAndDrop dnd = new DragAndDrop();
-        FurnaceMachine furnaceData = new FurnaceMachine();
-        furnaceData.setParent(tableau.rootNodes[0]);
-        ActorMachineCard actorMachineCard = new ActorMachineCard(skin, furnaceData, assetManager.get(furnaceData.getAssetName()), assetManager.get("cards/empty_card.png"), assetManager.get("machines/Grid_Overclocker_Upgrade.png"));
-
-        actorMachineCard.setPosition(1058.0f,328.5f);
-
-        RootGridActor tableauActor = new RootGridActor(tableau, skin, assetManager.get("cards/empty_root.png"));
-        tableauActor.setPosition(500, 700);
-        tableauActor.validate();
-
-        dnd.setDragTime(0);
-
-        dnd.addSource(new DragAndDrop.Source(actorMachineCard) {
-            private final Vector2 originalPos = new Vector2();
-            @Override
-            public DragAndDrop.Payload dragStart(InputEvent event, float x, float y, int pointer) {
-                DragAndDrop.Payload payload = new DragAndDrop.Payload();
-                payload.setDragActor(actorMachineCard);
-                dnd.setDragActorPosition(actorMachineCard.getWidth() - x, -y);
-                originalPos.set(actorMachineCard.getX(), actorMachineCard.getY());
-                return payload;
-            }
-
-            @Override
-            public void dragStop(InputEvent event, float x, float y, int pointer, DragAndDrop.Payload payload, DragAndDrop.Target target) {
-                super.dragStop(event, x, y, pointer, payload, target);
-                if (target == null) {
-                    dnd.getDragActor().setPosition(originalPos.x, originalPos.y);
-                }
-            }
-        });
-
-        for (RootActor rootActor : tableauActor.rootActors) {
-            dnd.addTarget(new DragAndDrop.Target(rootActor) {
-                @Override
-                public boolean drag(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
-                    return true;
-                }
-
-                @Override
-                public void drop(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
-                    ActorMachineCard machineCard = (ActorMachineCard) source.getActor();
-                    machineCard.setParentActor(rootActor);
-                }
-            });
-        }
+        context = new Context(stage);
+        context.initializeGame();
         stage.setDebugAll(true);
-        stage.addActor(testActor);
-        stage.addActor(actorMachineCard);
-        stage.addActor(tableauActor);
-        actorMachineCard.setParentActor(tableauActor.rootActors[0]);
         Gdx.input.setInputProcessor(stage);
     }
 
@@ -118,6 +39,6 @@ public class Main extends ApplicationAdapter {
     @Override
     public void dispose() {
         stage.dispose();
-        skin.dispose();
+        context.dispose();
     }
 }
