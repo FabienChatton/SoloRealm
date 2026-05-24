@@ -12,7 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
 public class RootActor extends Table {
     public final RootMachine data;
-    private final Image backgroundImage;
+    public final Image backgroundImage;
 
     public RootActor(Skin skin, RootMachine data, Texture backgroundTexture) {
         this.data = data;

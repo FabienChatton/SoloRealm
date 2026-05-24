@@ -7,6 +7,7 @@ import ch.solorealm.beans.RootGrid;
 import ch.solorealm.beans.machine.AssemblingMachine;
 import ch.solorealm.beans.machine.FurnaceMachine;
 import ch.solorealm.beans.machine.MachineNode;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
@@ -28,7 +29,13 @@ public final class ContextWrk {
             dnd.addTarget(new DragAndDrop.Target(rootActor) {
                 @Override
                 public boolean drag(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
+                    rootActor.backgroundImage.setColor(0.62f,0.95f,1f, 1f);
                     return true;
+                }
+
+                @Override
+                public void reset(DragAndDrop.Source source, DragAndDrop.Payload payload) {
+                    rootActor.backgroundImage.setColor(Color.WHITE);
                 }
 
                 @Override
