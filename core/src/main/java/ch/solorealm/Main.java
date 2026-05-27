@@ -16,7 +16,7 @@ public class Main extends ApplicationAdapter {
         stage = new Stage(new FitViewport(1488, 837));
         context = new Context(stage);
         context.initializeGame();
-        stage.setDebugAll(true);
+        // stage.setDebugAll(true);
         Gdx.input.setInputProcessor(stage);
     }
 

@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -17,6 +18,7 @@ import com.badlogic.gdx.utils.Align;
 public class ActorMachineCard extends Table {
     public final MachineNode data;
     private final Image icon;
+    public final Actor[] edgeDropActor;
     private static final float SCALE_FACTOR = 1.5f;
 
     public ActorMachineCard(Skin skin, MachineNode data, Texture iconTexture, Texture backgroundTexture, Texture arrowTexture) {
@@ -75,12 +77,29 @@ public class ActorMachineCard extends Table {
         this.add(contentTable).width(totalWidth).height(edgeHeight);
 
         setTouchable(Touchable.enabled);
+
+        edgeDropActor = new Actor[data.edges.length];
+        for (int i = 0; i < data.edges.length; i++) {
+            Actor dropEdgeActor = new Actor();
+            dropEdgeActor.setSize(edgeWidth, 120);
+            dropEdgeActor.setPosition((edgeWidth * i) + 32 * i, 0);
+            addActor(dropEdgeActor);
+            edgeDropActor[i] = dropEdgeActor;
+        }
     }
 
     public void setParentActor(RootActor rootActor) {
         data.setParent(rootActor.data);
         rootActor.validate();
         Vector2 stageCoordinate = rootActor.localToStageCoordinates(new Vector2(0, 0));
+        setPosition(stageCoordinate.x, stageCoordinate.y);
+        toFront();
+    }
+
+    public void setParentActor(ActorMachineCard parent) {
+        data.setParent(parent.data);
+        parent.validate();
+        Vector2 stageCoordinate = parent.localToStageCoordinates(new Vector2(0, -80));
         setPosition(stageCoordinate.x, stageCoordinate.y);
         toFront();
     }

@@ -9,6 +9,7 @@ import ch.solorealm.beans.machine.FurnaceMachine;
 import ch.solorealm.beans.machine.MachineNode;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 
@@ -83,5 +84,28 @@ public final class ContextWrk {
                 }
             }
         });
+
+        for (int i = 0; i < card.edgeDropActor.length; i++) {
+            Actor dropActor = card.edgeDropActor[i];
+            dnd.addTarget(new DragAndDrop.Target(dropActor) {
+                @Override
+                public boolean drag(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
+                    card.setColor(0.62f,0.95f,1f, 1f);
+                    return true;
+                }
+
+                @Override
+                public void reset(DragAndDrop.Source source, DragAndDrop.Payload payload) {
+                    card.setColor(Color.WHITE);
+                }
+
+                @Override
+                public void drop(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
+                    System.out.println("oui");
+                    ActorMachineCard dst = (ActorMachineCard) source.getActor();
+                    dst.setParentActor(card);
+                }
+            });
+        }
     }
 }
