@@ -89,17 +89,17 @@ public class ActorMachineCard extends Table {
     }
 
     public void setParentActor(RootActor rootActor) {
-        data.setParent(rootActor.data);
+        data.setParent(rootActor.data.edges[0]);
         rootActor.validate();
         Vector2 stageCoordinate = rootActor.localToStageCoordinates(new Vector2(0, 0));
         setPosition(stageCoordinate.x, stageCoordinate.y);
         toFront();
     }
 
-    public void setParentActor(ActorMachineCard parent) {
-        data.setParent(parent.data);
-        parent.validate();
-        Vector2 stageCoordinate = parent.localToStageCoordinates(new Vector2(0, -80));
+    public void setParentActor(ActorMachineCard card, MachineEdge edge, Actor edgeActor) {
+        data.setParent(edge);
+        card.validate();
+        Vector2 stageCoordinate = edgeActor.localToStageCoordinates(new Vector2(0, -80));
         setPosition(stageCoordinate.x, stageCoordinate.y);
         toFront();
     }

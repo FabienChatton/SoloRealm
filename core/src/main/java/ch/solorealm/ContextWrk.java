@@ -87,6 +87,7 @@ public final class ContextWrk {
 
         for (int i = 0; i < card.edgeDropActor.length; i++) {
             Actor dropActor = card.edgeDropActor[i];
+            int finalI = i;
             dnd.addTarget(new DragAndDrop.Target(dropActor) {
                 @Override
                 public boolean drag(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
@@ -101,9 +102,8 @@ public final class ContextWrk {
 
                 @Override
                 public void drop(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
-                    System.out.println("oui");
                     ActorMachineCard dst = (ActorMachineCard) source.getActor();
-                    dst.setParentActor(card);
+                    dst.setParentActor(card, card.data.edges[finalI], dropActor);
                 }
             });
         }

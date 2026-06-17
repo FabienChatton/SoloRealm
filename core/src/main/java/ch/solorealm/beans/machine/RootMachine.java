@@ -2,7 +2,9 @@ package ch.solorealm.beans.machine;
 
 public class RootMachine extends MachineNode {
     public RootMachine() {
-        super(null);
+        super(new MachineEdge[] {
+            new MachineEdge(null, null)
+        });
     }
 
     @Override
