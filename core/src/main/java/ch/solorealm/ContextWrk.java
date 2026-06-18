@@ -67,12 +67,14 @@ public final class ContextWrk {
 
         dnd.addSource(new DragAndDrop.Source(card) {
             private final Vector2 originalPos = new Vector2();
+            private final Vector2 deltaPos = new Vector2();
             @Override
             public DragAndDrop.Payload dragStart(InputEvent event, float x, float y, int pointer) {
                 DragAndDrop.Payload payload = new DragAndDrop.Payload();
                 payload.setDragActor(card);
                 dnd.setDragActorPosition(card.getWidth() - x, -y);
                 originalPos.set(card.getX(), card.getY());
+                deltaPos.set(card.getX(), card.getY());
                 card.toFront();
                 return payload;
             }
@@ -82,6 +84,15 @@ public final class ContextWrk {
                 if (target == null) {
                     dnd.getDragActor().setPosition(originalPos.x, originalPos.y);
                 }
+            }
+
+            @Override
+            public void drag(InputEvent event, float x, float y, int pointer) {
+                deltaPos.set(card.getX() - deltaPos.x, card.getY() - deltaPos.y);
+                for (ActorMachineCard cardChild : card.getCardChildren()) {
+                    cardChild.moveByR(deltaPos.x, deltaPos.y);
+                }
+                deltaPos.set(card.getX(), card.getY());
             }
         });
 

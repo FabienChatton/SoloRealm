@@ -15,15 +15,21 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.utils.Align;
 
-public class ActorMachineCard extends Table {
+import java.util.ArrayList;
+import java.util.List;
+
+public class ActorMachineCard extends Table implements GetCardChildren {
     public final MachineNode data;
     private final Image icon;
     public final Actor[] edgeDropActor;
+    private final List<ActorMachineCard> cardActorChild;
+    private GetCardChildren cardActorParent;
     private static final float SCALE_FACTOR = 1.5f;
 
     public ActorMachineCard(Skin skin, MachineNode data, Texture iconTexture, Texture backgroundTexture, Texture arrowTexture) {
         this.data = data;
         this.icon = new Image(iconTexture);
+        this.cardActorChild = new ArrayList<>();
 
         float edgeWidth = backgroundTexture.getWidth() * SCALE_FACTOR;
         float edgeHeight = backgroundTexture.getHeight() * SCALE_FACTOR;
@@ -89,6 +95,12 @@ public class ActorMachineCard extends Table {
     }
 
     public void setParentActor(RootActor rootActor) {
+        if (cardActorParent != null) {
+            cardActorParent.getCardChildren().remove(this);
+        }
+        cardActorParent = rootActor;
+        cardActorParent.getCardChildren().add(this);
+
         data.setParent(rootActor.data.edges[0]);
         rootActor.validate();
         Vector2 stageCoordinate = rootActor.localToStageCoordinates(new Vector2(0, 0));
@@ -96,11 +108,28 @@ public class ActorMachineCard extends Table {
         toFront();
     }
 
-    public void setParentActor(ActorMachineCard card, MachineEdge edge, Actor edgeActor) {
+    public void setParentActor(ActorMachineCard newParentCard, MachineEdge edge, Actor edgeActor) {
+        cardActorParent.getCardChildren().remove(this);
+        cardActorParent = newParentCard;
+        cardActorParent.getCardChildren().add(this);
+
         data.setParent(edge);
-        card.validate();
+        validate();
         Vector2 stageCoordinate = edgeActor.localToStageCoordinates(new Vector2(0, -80));
         setPosition(stageCoordinate.x, stageCoordinate.y);
         toFront();
+    }
+
+    @Override
+    public List<ActorMachineCard> getCardChildren() {
+        return cardActorChild;
+    }
+
+    public void moveByR(float x, float y) {
+        for (ActorMachineCard cardChild : getCardChildren()) {
+            cardChild.moveByR(x, y);
+        }
+        toFront();
+        moveBy(x, y);
     }
 }
