@@ -24,6 +24,7 @@ public class ActorMachineCard extends Table implements GetCardChildren {
     public final Actor[] edgeDropActor;
     private final List<ActorMachineCard> cardActorChild;
     private GetCardChildren cardActorParent;
+    private Actor edgeParentActor;
     private static final float SCALE_FACTOR = 1.5f;
 
     public ActorMachineCard(Skin skin, MachineNode data, Texture iconTexture, Texture backgroundTexture, Texture arrowTexture) {
@@ -100,24 +101,35 @@ public class ActorMachineCard extends Table implements GetCardChildren {
         }
         cardActorParent = rootActor;
         cardActorParent.getCardChildren().add(this);
+        edgeParentActor = rootActor;
 
         data.setParent(rootActor.data.edges[0]);
         rootActor.validate();
-        Vector2 stageCoordinate = rootActor.localToStageCoordinates(new Vector2(0, 0));
-        setPosition(stageCoordinate.x, stageCoordinate.y);
-        toFront();
+        setParentActorR();
     }
 
-    public void setParentActor(ActorMachineCard newParentCard, MachineEdge edge, Actor edgeActor) {
+    public void setParentActor(ActorMachineCard newParentCard, MachineEdge edge, Actor edgeParentActor) {
         cardActorParent.getCardChildren().remove(this);
         cardActorParent = newParentCard;
         cardActorParent.getCardChildren().add(this);
 
         data.setParent(edge);
         validate();
-        Vector2 stageCoordinate = edgeActor.localToStageCoordinates(new Vector2(0, -80));
+        this.edgeParentActor = edgeParentActor;
+        setParentActorR();
+    }
+
+    public void setParentActorR() {
+        int padY = 0;
+        if (cardActorParent != edgeParentActor) {
+            padY = -80;
+        }
+        Vector2 stageCoordinate = edgeParentActor.localToStageCoordinates(new Vector2(0, padY));
         setPosition(stageCoordinate.x, stageCoordinate.y);
         toFront();
+        for (ActorMachineCard cardChild : getCardChildren()) {
+            cardChild.setParentActorR();
+        }
     }
 
     @Override
