@@ -23,4 +23,18 @@ public class RootGridActor extends Table {
         }
         add(hGroup);
     }
+
+    public boolean isDropValide(int rootActorIndex, ActorMachineCard machineCard) {
+        int cardWith = machineCard.data.edges.length;
+        for (int i = rootActorIndex; i < rootActorIndex + cardWith; i++) {
+            if (i >= rootActors.length) {
+                return false;
+            }
+            if (!rootActors[i].getCardChildren().contains(machineCard)
+                && !rootActors[i].getCardChildren().isEmpty()) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

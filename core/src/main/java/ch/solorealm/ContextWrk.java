@@ -26,10 +26,16 @@ public final class ContextWrk {
 
     public void createGrid() {
         tableau = new RootGridActor(new RootGrid(6), context.skin, context.assetManager.get("cards/empty_root.png"));
-        for (RootActor rootActor : tableau.rootActors) {
+        for (int i = 0; i < tableau.rootActors.length; i++) {
+            RootActor rootActor = tableau.rootActors[i];
+            int finalI = i;
             dnd.addTarget(new DragAndDrop.Target(rootActor) {
                 @Override
                 public boolean drag(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
+                    ActorMachineCard machineCard = (ActorMachineCard) source.getActor();
+                    if (!tableau.isDropValide(finalI, machineCard)) {
+                        return false;
+                    }
                     rootActor.backgroundImage.setColor(0.62f,0.95f,1f, 1f);
                     return true;
                 }
