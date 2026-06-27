@@ -60,6 +60,7 @@ public final class ContextWrk {
         // test
         createActorMachineCard(new AssemblingMachine(), tableau.rootActors[0]);
         createActorMachineCard(new FurnaceMachine(), tableau.rootActors[2]);
+        createActorMachineCard(new AssemblingMachine(), tableau.rootActors[3]);
     }
 
     public ActorMachineCard createActorMachineCard(MachineNode data) {
@@ -89,6 +90,9 @@ public final class ContextWrk {
                 super.dragStop(event, x, y, pointer, payload, target);
                 if (target == null) {
                     dnd.getDragActor().setPosition(originalPos.x, originalPos.y);
+                    for (ActorMachineCard cardChild : card.getCardChildren()) {
+                        cardChild.setParentActorR();
+                    }
                 }
             }
 
