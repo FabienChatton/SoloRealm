@@ -98,22 +98,26 @@ public class ActorMachineCard extends Table implements GetCardChildren {
     public void setParentActor(RootActor rootActor) {
         if (cardActorParent != null) {
             cardActorParent.getCardChildren().remove(this);
+            data.getParent().setChildNode(null);
         }
         cardActorParent = rootActor;
         cardActorParent.getCardChildren().add(this);
         edgeParentActor = rootActor;
 
         data.setParent(rootActor.data.edges[0]);
+        data.getParent().setChildNode(data);
         rootActor.validate();
         setParentActorR();
     }
 
     public void setParentActor(ActorMachineCard newParentCard, MachineEdge edge, Actor edgeParentActor) {
         cardActorParent.getCardChildren().remove(this);
+        data.getParent().setChildNode(null);
         cardActorParent = newParentCard;
         cardActorParent.getCardChildren().add(this);
 
         data.setParent(edge);
+        data.getParent().setChildNode(data);
         validate();
         this.edgeParentActor = edgeParentActor;
         setParentActorR();

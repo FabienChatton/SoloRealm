@@ -7,6 +7,7 @@ public class MachineEdge {
     private IngredientCard input;
     private IngredientCard output;
     private MachineNode node;
+    private MachineNode childNode;
 
     public final IngredientType inputType;
     public final IngredientType outputType;
@@ -22,5 +23,13 @@ public class MachineEdge {
 
     public MachineNode getNode() {
         return node;
+    }
+
+    public MachineNode getChildNode() {
+        return childNode;
+    }
+
+    public void setChildNode(MachineNode childNode) {
+        this.childNode = childNode;
     }
 }

@@ -112,6 +112,10 @@ public final class ContextWrk {
             dnd.addTarget(new DragAndDrop.Target(dropActor) {
                 @Override
                 public boolean drag(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
+                    ActorMachineCard dst = (ActorMachineCard) source.getActor();
+                    if (!tableau.isDropValide(card, finalI, dst)) {
+                        return false;
+                    }
                     card.setColor(0.62f,0.95f,1f, 1f);
                     return true;
                 }

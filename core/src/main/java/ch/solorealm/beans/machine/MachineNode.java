@@ -23,4 +23,8 @@ public abstract class MachineNode implements GetAssetResource {
     public void setParent(MachineEdge machineNode) {
         parent = machineNode;
     }
+
+    public MachineEdge getParent() {
+        return parent;
+    }
 }
