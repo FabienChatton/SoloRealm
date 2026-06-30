@@ -45,7 +45,9 @@ public class RootGridActor extends Table {
 
     public boolean isDropValide(ActorMachineCard card, int dropActorIndex, ActorMachineCard cardToDrop) {
         if (card == cardToDrop) return false;
+        int edgePos = getEdgePos(card.data.edges[dropActorIndex]);
         int cardWith = cardToDrop.data.edges.length;
+        if (edgePos + cardWith > data.rootNodes.length) return false;
         int height = 0;
         MachineNode rootParent = card.data;
         while(rootParent != null) {
@@ -84,5 +86,27 @@ public class RootGridActor extends Table {
             list.addAll(getMachineAtHeight(edge.getChildNode(), height - 1, cardWith - i));
         }
         return list;
+    }
+
+    private int getEdgePos(MachineEdge edge) {
+        int pos = 0;
+        MachineNode node = edge.getNode();
+        while (node.getParent() != null) {
+            for (int i = 0; i < node.edges.length; i++) {
+                if (node.edges[i] == edge) {
+                    pos += i;
+                }
+            }
+            edge = node.getParent();
+            if (edge != null) {
+                node = edge.getNode();
+            }
+        }
+        for (int i = 0; i < rootActors.length; i++) {
+            if (rootActors[i].data == node) {
+                pos += i;
+            }
+        }
+        return pos;
     }
 }
