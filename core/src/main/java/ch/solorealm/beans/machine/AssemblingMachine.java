@@ -12,12 +12,12 @@ public class AssemblingMachine extends MachineNode {
 
 
     @Override
-    public String getAssetName() {
+    public String getAssetRecourcePath() {
         return "machines/Assembling_Machine.png";
     }
 
     @Override
-    public String getMachineName() {
+    public String getMachineDisplayName() {
         return "Assembling Machine";
     }
 }

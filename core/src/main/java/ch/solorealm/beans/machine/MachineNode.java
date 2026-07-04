@@ -13,11 +13,11 @@ public abstract class MachineNode implements GetAssetResource {
         }
     }
 
-    public abstract String getMachineName();
+    public abstract String getMachineDisplayName();
 
     @Override
-    public String getAssetName() {
-        return String.format("machines/%s.png", getMachineName());
+    public String getAssetRecourcePath() {
+        return String.format("machines/%s.png", getMachineDisplayName());
     }
 
     public void setParent(MachineEdge machineNode) {

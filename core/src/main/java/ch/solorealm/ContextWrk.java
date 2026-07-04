@@ -7,6 +7,7 @@ import ch.solorealm.beans.RootGrid;
 import ch.solorealm.beans.machine.AssemblingMachine;
 import ch.solorealm.beans.machine.FurnaceMachine;
 import ch.solorealm.beans.machine.MachineNode;
+import ch.solorealm.beans.machine.MiningMachine;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -33,7 +34,7 @@ public final class ContextWrk {
                 @Override
                 public boolean drag(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
                     ActorMachineCard machineCard = (ActorMachineCard) source.getActor();
-                    if (!tableau.isDropValide(finalI, machineCard)) {
+                    if (!tableau.data.isDropValide(finalI, machineCard.data)) {
                         return false;
                     }
                     rootActor.backgroundImage.setColor(0.62f,0.95f,1f, 1f);
@@ -61,10 +62,11 @@ public final class ContextWrk {
         createActorMachineCard(new AssemblingMachine(), tableau.rootActors[0]);
         createActorMachineCard(new FurnaceMachine(), tableau.rootActors[2]);
         createActorMachineCard(new AssemblingMachine(), tableau.rootActors[3]);
+        createActorMachineCard(new MiningMachine(), tableau.rootActors[5]);
     }
 
     public ActorMachineCard createActorMachineCard(MachineNode data) {
-        return new ActorMachineCard(context.skin, data, context.assetManager.get(data.getAssetName()), context.assetManager.get("cards/empty_card.png"), context.assetManager.get("machines/Grid_Overclocker_Upgrade.png"));
+        return new ActorMachineCard(context.skin, data, context.assetManager.get(data.getAssetRecourcePath()), context.assetManager.get("cards/empty_card.png"), context.assetManager.get("machines/Grid_Overclocker_Upgrade.png"));
     }
 
     public void createActorMachineCard(MachineNode data, RootActor parent) {
@@ -113,7 +115,7 @@ public final class ContextWrk {
                 @Override
                 public boolean drag(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
                     ActorMachineCard dst = (ActorMachineCard) source.getActor();
-                    if (!tableau.isDropValide(card, finalI, dst)) {
+                    if (!tableau.data.isDropValide(card.data, finalI, dst.data)) {
                         return false;
                     }
                     card.setColor(0.62f,0.95f,1f, 1f);

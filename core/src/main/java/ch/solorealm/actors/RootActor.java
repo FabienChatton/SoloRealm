@@ -2,7 +2,6 @@ package ch.solorealm.actors;
 
 import ch.solorealm.beans.machine.RootMachine;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -33,7 +32,6 @@ public class RootActor extends Table implements GetCardChildren {
         addListener(new ClickListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                System.out.println(localToStageCoordinates(new Vector2(0, 0)));
                 return true;
             }
         });

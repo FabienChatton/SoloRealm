@@ -8,7 +8,7 @@ public class RootMachine extends MachineNode {
     }
 
     @Override
-    public String getMachineName() {
+    public String getMachineDisplayName() {
         return "root";
     }
 }

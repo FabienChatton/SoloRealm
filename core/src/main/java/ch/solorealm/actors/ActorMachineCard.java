@@ -49,7 +49,7 @@ public class ActorMachineCard extends Table implements GetCardChildren {
             float arrowW = arrowTexture.getWidth() * SCALE_FACTOR;
             float arrowH = arrowTexture.getHeight() * SCALE_FACTOR;
 
-            if (edge.outputType != null) {
+            if (edge.inputType != null) {
                 Image arrowImage = new Image(arrowTexture);
                 arrowImage.setOrigin(arrowW / 2f, arrowH / 2f);
                 arrowImage.rotateBy(180);
@@ -59,7 +59,7 @@ public class ActorMachineCard extends Table implements GetCardChildren {
                 edgeTable.add().size(arrowW, arrowH);
             }
 
-            if (edge.inputType != null) {
+            if (edge.outputType != null) {
                 edgeTable.add(new Image(arrowTexture)).size(arrowW, arrowH);
             } else {
                 edgeTable.add().size(arrowW, arrowH);
@@ -75,7 +75,7 @@ public class ActorMachineCard extends Table implements GetCardChildren {
         Table contentTable = new Table();
         contentTable.add(edgesRowTable).expandX().fillX().row();
 
-        Label machineNameLabel = new Label(data.getMachineName(), skin, "window");
+        Label machineNameLabel = new Label(data.getMachineDisplayName(), skin, "window");
         machineNameLabel.setColor(Color.BLACK);
         machineNameLabel.setFontScale(SCALE_FACTOR);
 
