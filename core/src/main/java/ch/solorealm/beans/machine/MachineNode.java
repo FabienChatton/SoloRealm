@@ -1,5 +1,6 @@
 package ch.solorealm.beans.machine;
 
+import ch.solorealm.beans.ContextUi;
 import ch.solorealm.beans.GetAssetResource;
 
 public abstract class MachineNode implements GetAssetResource {
@@ -11,6 +12,10 @@ public abstract class MachineNode implements GetAssetResource {
         for (MachineEdge edge : edges) {
             edge.setNode(this);
         }
+    }
+
+    public void process(ContextUi contextUi) {
+
     }
 
     public abstract String getMachineDisplayName();

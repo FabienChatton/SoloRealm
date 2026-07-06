@@ -15,14 +15,14 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.utils.Align;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class ActorMachineCard extends Table implements GetCardChildren {
     public final MachineNode data;
     private final Image icon;
     public final Actor[] edgeDropActor;
     private final List<ActorMachineCard> cardActorChild;
+    private final Map<MachineEdge, Map.Entry<Actor, Actor>> edgeActorMap;
     private GetCardChildren cardActorParent;
     private Actor edgeParentActor;
     private static final float SCALE_FACTOR = 1.5f;
@@ -31,6 +31,7 @@ public class ActorMachineCard extends Table implements GetCardChildren {
         this.data = data;
         this.icon = new Image(iconTexture);
         this.cardActorChild = new ArrayList<>();
+        this.edgeActorMap = new HashMap<>();
 
         float edgeWidth = backgroundTexture.getWidth() * SCALE_FACTOR;
         float edgeHeight = backgroundTexture.getHeight() * SCALE_FACTOR;
@@ -49,21 +50,26 @@ public class ActorMachineCard extends Table implements GetCardChildren {
             float arrowW = arrowTexture.getWidth() * SCALE_FACTOR;
             float arrowH = arrowTexture.getHeight() * SCALE_FACTOR;
 
+            Image inputArrowImage = null;
+            Image outputArrowImage = null;
             if (edge.inputType != null) {
-                Image arrowImage = new Image(arrowTexture);
-                arrowImage.setOrigin(arrowW / 2f, arrowH / 2f);
-                arrowImage.rotateBy(180);
-                arrowImage.setAlign(Align.center);
-                edgeTable.add(arrowImage).size(arrowW, arrowH);
+                inputArrowImage = new Image(arrowTexture);
+                inputArrowImage.setOrigin(arrowW / 2f, arrowH / 2f);
+                inputArrowImage.rotateBy(180);
+                inputArrowImage.setAlign(Align.center);
+                edgeTable.add(inputArrowImage).size(arrowW, arrowH);
             } else {
                 edgeTable.add().size(arrowW, arrowH);
             }
 
             if (edge.outputType != null) {
-                edgeTable.add(new Image(arrowTexture)).size(arrowW, arrowH);
+                outputArrowImage = new Image(arrowTexture);
+                edgeTable.add(outputArrowImage).size(arrowW, arrowH);
             } else {
                 edgeTable.add().size(arrowW, arrowH);
             }
+
+            edgeActorMap.put(edge, new AbstractMap.SimpleEntry<>(inputArrowImage, outputArrowImage));
 
             edgesRowTable.add(edgeTable).width(edgeWidth).center();
 
@@ -147,5 +153,15 @@ public class ActorMachineCard extends Table implements GetCardChildren {
         }
         toFront();
         moveBy(x, y);
+    }
+
+    public Actor getEdgeActor(MachineEdge edge, boolean inputSlot) {
+        Map.Entry<Actor, Actor> actorActorEntry = edgeActorMap.get(edge);
+        if (actorActorEntry == null) return null;
+        if (inputSlot) {
+            return actorActorEntry.getKey();
+        } else {
+            return actorActorEntry.getValue();
+        }
     }
 }

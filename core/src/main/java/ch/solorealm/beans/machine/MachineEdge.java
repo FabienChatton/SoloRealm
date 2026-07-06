@@ -4,13 +4,13 @@ import ch.solorealm.beans.ingredient.IngredientCard;
 import ch.solorealm.beans.ingredient.IngredientType;
 
 public class MachineEdge {
-    private IngredientCard input;
-    private IngredientCard output;
     private MachineNode node;
     private MachineNode childNode;
 
     public final IngredientType inputType;
     public final IngredientType outputType;
+    public IngredientCard input;
+    public IngredientCard output;
 
     public MachineEdge(IngredientType inputType, IngredientType outputType) {
         this.inputType = inputType;

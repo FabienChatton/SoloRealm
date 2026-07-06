@@ -28,6 +28,7 @@ public class Context implements Disposable {
     public void loadAsset() {
         assetManager.load("cards/empty_card.png", Texture.class);
         assetManager.load("ingredients/copper_ingot.png", Texture.class);
+        assetManager.load("ingredients/copper_ore.png", Texture.class);
         assetManager.load("machines/furnace.png", Texture.class);
         assetManager.load("machines/Grid_Overclocker_Upgrade.png", Texture.class);
         assetManager.load("cards/empty_root.png", Texture.class);

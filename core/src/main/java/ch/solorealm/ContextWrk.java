@@ -3,18 +3,27 @@ package ch.solorealm;
 import ch.solorealm.actors.ActorMachineCard;
 import ch.solorealm.actors.RootActor;
 import ch.solorealm.actors.RootGridActor;
+import ch.solorealm.beans.ContextUi;
 import ch.solorealm.beans.RootGrid;
-import ch.solorealm.beans.machine.AssemblingMachine;
-import ch.solorealm.beans.machine.FurnaceMachine;
-import ch.solorealm.beans.machine.MachineNode;
-import ch.solorealm.beans.machine.MiningMachine;
+import ch.solorealm.beans.ingredient.IngredientCard;
+import ch.solorealm.beans.ingredient.IngredientMaterial;
+import ch.solorealm.beans.machine.*;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 
-public final class ContextWrk {
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Set;
+
+public final class ContextWrk implements ContextUi {
     private final Context context;
     private final DragAndDrop dnd;
     private RootGridActor tableau;
@@ -58,11 +67,25 @@ public final class ContextWrk {
         tableau.validate();
         context.stage.addActor(tableau);
 
+        TextButton processButton = new TextButton("Process", context.skin);
+        processButton.setPosition(1000, 50);
+        processButton.setWidth(440);
+        processButton.setHeight(100);
+        processButton.getLabel().setFontScale(3);
+        processButton.addListener(new ClickListener() {
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                process();
+                return true;
+            }
+        });
+        context.stage.addActor(processButton);
+
         // test
         createActorMachineCard(new AssemblingMachine(), tableau.rootActors[0]);
         createActorMachineCard(new FurnaceMachine(), tableau.rootActors[2]);
         createActorMachineCard(new AssemblingMachine(), tableau.rootActors[3]);
-        createActorMachineCard(new MiningMachine(), tableau.rootActors[5]);
+        createActorMachineCard(new MiningMachine(IngredientMaterial.COPPER), tableau.rootActors[5]);
     }
 
     public ActorMachineCard createActorMachineCard(MachineNode data) {
@@ -134,5 +157,49 @@ public final class ContextWrk {
                 }
             });
         }
+    }
+
+    @Override
+    public void addActorIngredientCard(IngredientCard ingredientCard, MachineEdge edge, boolean inputSlot) {
+        ActorMachineCard actorMachineNode = findActorMachineNode(edge.getNode());
+        Actor edgeActor = actorMachineNode.getEdgeActor(edge, inputSlot);
+        Vector2 stageCoordinates = edgeActor.localToStageCoordinates(new Vector2(edgeActor.getX(), edgeActor.getY()));
+        Image ingredientImage = new Image(context.assetManager.get(ingredientCard.getAssetRecourcePath(), Texture.class));
+        ingredientImage.setPosition(stageCoordinates.x - 58, stageCoordinates.y);
+        actorMachineNode.addActor(ingredientImage);
+        context.stage.addActor(ingredientImage);
+    }
+
+    private void process() {
+        tableau.data.process(this);
+    }
+
+    private Set<ActorMachineCard> getAllActorMachineNode() {
+        Set<ActorMachineCard> machines = new HashSet<>();
+        Queue<ActorMachineCard> actorMachineCardsQueue = new LinkedList<>();
+        for (RootActor rootActor : tableau.rootActors) {
+            actorMachineCardsQueue.addAll(rootActor.getCardChildren());
+            while (!actorMachineCardsQueue.isEmpty()) {
+                ActorMachineCard actorMachineCard = actorMachineCardsQueue.poll();
+                machines.add(actorMachineCard);
+                actorMachineCardsQueue.addAll(actorMachineCard.getCardChildren());
+            }
+        }
+        return machines;
+    }
+
+    private ActorMachineCard findActorMachineNode(MachineNode node) {
+        Queue<ActorMachineCard> actorMachineCardsQueue = new LinkedList<>();
+        for (RootActor rootActor : tableau.rootActors) {
+            actorMachineCardsQueue.addAll(rootActor.getCardChildren());
+            while (!actorMachineCardsQueue.isEmpty()) {
+                ActorMachineCard actorMachineCard = actorMachineCardsQueue.poll();
+                if (actorMachineCard.data == node) {
+                    return actorMachineCard;
+                }
+                actorMachineCardsQueue.addAll(actorMachineCard.getCardChildren());
+            }
+        }
+        return null;
     }
 }

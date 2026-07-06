@@ -5,7 +5,9 @@ import ch.solorealm.beans.machine.MachineNode;
 import ch.solorealm.beans.machine.RootMachine;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 public class RootGrid {
     public final RootMachine[] rootNodes;
@@ -112,5 +114,23 @@ public class RootGrid {
             max = Math.max(max, getTotalWidth(node.edges[i].getChildNode()) + i);
         }
         return max;
+    }
+
+    public void process(ContextUi contextUi) {
+        Queue<MachineNode> machineQueue = new LinkedList<>();
+        for (RootMachine rootNode : rootNodes) {
+            if (rootNode.edges[0].getChildNode() != null) {
+                machineQueue.add(rootNode.edges[0].getChildNode());
+            }
+            while (!machineQueue.isEmpty()) {
+                MachineNode machineNode = machineQueue.poll();
+                machineNode.process(contextUi);
+                for (MachineEdge edge : machineNode.edges) {
+                    if (edge.getChildNode() != null) {
+                        machineQueue.add(edge.getChildNode());
+                    }
+                }
+            }
+        }
     }
 }
