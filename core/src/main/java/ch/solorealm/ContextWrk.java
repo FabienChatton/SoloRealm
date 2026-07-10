@@ -162,12 +162,9 @@ public final class ContextWrk implements ContextUi {
     @Override
     public void addActorIngredientCard(IngredientCard ingredientCard, MachineEdge edge, boolean inputSlot) {
         ActorMachineCard actorMachineNode = findActorMachineNode(edge.getNode());
-        Actor edgeActor = actorMachineNode.getEdgeActor(edge, inputSlot);
-        Vector2 stageCoordinates = edgeActor.localToStageCoordinates(new Vector2(edgeActor.getX(), edgeActor.getY()));
-        Image ingredientImage = new Image(context.assetManager.get(ingredientCard.getAssetRecourcePath(), Texture.class));
-        ingredientImage.setPosition(stageCoordinates.x - 58, stageCoordinates.y);
-        actorMachineNode.addActor(ingredientImage);
-        context.stage.addActor(ingredientImage);
+        if (actorMachineNode == null) return;
+        Image ingredientActor = new Image(context.assetManager.get(ingredientCard.getAssetRecourcePath(), Texture.class));
+        actorMachineNode.addActorIngredientCard(edge, ingredientActor, inputSlot);
     }
 
     private void process() {

@@ -15,14 +15,18 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.utils.Align;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ActorMachineCard extends Table implements GetCardChildren {
     public final MachineNode data;
     private final Image icon;
     public final Actor[] edgeDropActor;
     private final List<ActorMachineCard> cardActorChild;
-    private final Map<MachineEdge, Map.Entry<Actor, Actor>> edgeActorMap;
+    private final Map<MachineEdge, Actor[]> edgeActorMap;
+    private Table edgeTable;
     private GetCardChildren cardActorParent;
     private Actor edgeParentActor;
     private static final float SCALE_FACTOR = 1.5f;
@@ -45,7 +49,7 @@ public class ActorMachineCard extends Table implements GetCardChildren {
 
         for (int i = 0; i < data.edges.length; i++) {
             MachineEdge edge = data.edges[i];
-            Table edgeTable = new Table();
+            edgeTable = new Table();
 
             float arrowW = arrowTexture.getWidth() * SCALE_FACTOR;
             float arrowH = arrowTexture.getHeight() * SCALE_FACTOR;
@@ -69,7 +73,7 @@ public class ActorMachineCard extends Table implements GetCardChildren {
                 edgeTable.add().size(arrowW, arrowH);
             }
 
-            edgeActorMap.put(edge, new AbstractMap.SimpleEntry<>(inputArrowImage, outputArrowImage));
+            edgeActorMap.put(edge, new Actor[]{inputArrowImage, outputArrowImage});
 
             edgesRowTable.add(edgeTable).width(edgeWidth).center();
 
@@ -155,13 +159,21 @@ public class ActorMachineCard extends Table implements GetCardChildren {
         moveBy(x, y);
     }
 
-    public Actor getEdgeActor(MachineEdge edge, boolean inputSlot) {
-        Map.Entry<Actor, Actor> actorActorEntry = edgeActorMap.get(edge);
+    public void addActorIngredientCard(MachineEdge edge, Actor ingredientActor, boolean inputSlot) {
+        Actor edgeActor = getEdgeActor(edge, inputSlot);
+        if (edgeActor == null) return;
+        Vector2 edgeTablePos = edgeActor.getParent().getParent().localToParentCoordinates(Vector2.Zero);
+        ingredientActor.setPosition(edgeActor.getX(), edgeTablePos.y);
+        addActor(ingredientActor);
+    }
+
+    private Actor getEdgeActor(MachineEdge edge, boolean inputSlot) {
+        Actor[] actorActorEntry = edgeActorMap.get(edge);
         if (actorActorEntry == null) return null;
         if (inputSlot) {
-            return actorActorEntry.getKey();
+            return actorActorEntry[0];
         } else {
-            return actorActorEntry.getValue();
+            return actorActorEntry[1];
         }
     }
 }
