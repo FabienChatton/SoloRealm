@@ -13,10 +13,12 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -25,13 +27,17 @@ import java.util.Set;
 
 public final class ContextWrk implements ContextUi {
     private final Context context;
-    private final DragAndDrop dnd;
+    private final DragAndDrop dndMachine;
+    private final DragAndDrop dndIngredient;
     private RootGridActor tableau;
 
     public ContextWrk(Context context) {
         this.context = context;
-        dnd = new DragAndDrop();
-        dnd.setDragTime(0);
+        dndMachine = new DragAndDrop();
+        dndMachine.setDragTime(0);
+        dndIngredient = new DragAndDrop();
+        dndIngredient.setDragTime(0);
+        dndIngredient.setKeepWithinStage(false);
     }
 
     public void createGrid() {
@@ -39,7 +45,7 @@ public final class ContextWrk implements ContextUi {
         for (int i = 0; i < tableau.rootActors.length; i++) {
             RootActor rootActor = tableau.rootActors[i];
             int finalI = i;
-            dnd.addTarget(new DragAndDrop.Target(rootActor) {
+            dndMachine.addTarget(new DragAndDrop.Target(rootActor) {
                 @Override
                 public boolean drag(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
                     ActorMachineCard machineCard = (ActorMachineCard) source.getActor();
@@ -97,14 +103,22 @@ public final class ContextWrk implements ContextUi {
         card.setParentActor(parent);
         context.stage.addActor(card);
 
-        dnd.addSource(new DragAndDrop.Source(card) {
+        dndMachine.addSource(new DragAndDrop.Source(card) {
             private final Vector2 originalPos = new Vector2();
             private final Vector2 deltaPos = new Vector2();
             @Override
             public DragAndDrop.Payload dragStart(InputEvent event, float x, float y, int pointer) {
+                // test if the click is on the ingredient texture or not
+                // so if it is on the ingredient texture, it can do the ingredient drag and drop
+                Actor hit = card.hit(x, y, true);
+                if (hit instanceof Image image && image.getDrawable() instanceof TextureRegionDrawable region) {
+                    if (!region.getRegion().getTexture().toString().contains("Grid_Overclocker_Upgrade.png")) {
+                        return null;
+                    }
+                }
                 DragAndDrop.Payload payload = new DragAndDrop.Payload();
                 payload.setDragActor(card);
-                dnd.setDragActorPosition(card.getWidth() - x, -y);
+                dndMachine.setDragActorPosition(card.getWidth() - x, -y);
                 originalPos.set(card.getX(), card.getY());
                 deltaPos.set(card.getX(), card.getY());
                 card.toFront();
@@ -114,7 +128,7 @@ public final class ContextWrk implements ContextUi {
             public void dragStop(InputEvent event, float x, float y, int pointer, DragAndDrop.Payload payload, DragAndDrop.Target target) {
                 super.dragStop(event, x, y, pointer, payload, target);
                 if (target == null) {
-                    dnd.getDragActor().setPosition(originalPos.x, originalPos.y);
+                    dndMachine.getDragActor().setPosition(originalPos.x, originalPos.y);
                     for (ActorMachineCard cardChild : card.getCardChildren()) {
                         cardChild.setParentActorR();
                     }
@@ -134,7 +148,7 @@ public final class ContextWrk implements ContextUi {
         for (int i = 0; i < card.edgeDropActor.length; i++) {
             Actor dropActor = card.edgeDropActor[i];
             int finalI = i;
-            dnd.addTarget(new DragAndDrop.Target(dropActor) {
+            dndMachine.addTarget(new DragAndDrop.Target(dropActor) {
                 @Override
                 public boolean drag(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
                     ActorMachineCard dst = (ActorMachineCard) source.getActor();
@@ -165,6 +179,29 @@ public final class ContextWrk implements ContextUi {
         if (actorMachineNode == null) return;
         Image ingredientActor = new Image(context.assetManager.get(ingredientCard.getAssetRecourcePath(), Texture.class));
         actorMachineNode.addActorIngredientCard(edge, ingredientActor, inputSlot);
+        ingredientActor.setTouchable(Touchable.enabled);
+        dndIngredient.addSource(new DragAndDrop.Source(ingredientActor) {
+            private final Vector2 originalPos = new Vector2();
+            private final Vector2 deltaPos = new Vector2();
+            @Override
+            public DragAndDrop.Payload dragStart(InputEvent inputEvent, float x, float y, int pointer) {
+                DragAndDrop.Payload payload = new DragAndDrop.Payload();
+                payload.setDragActor(ingredientActor);
+                dndIngredient.setDragActorPosition(-ingredientActor.getParent().getX() + ingredientActor.getWidth() / 2, -ingredientActor.getParent().getY() - ingredientActor.getHeight() / 2);
+                originalPos.set(ingredientActor.getX(), ingredientActor.getY());
+                deltaPos.set(ingredientActor.getX(), ingredientActor.getY());
+                ingredientActor.toFront();
+                return payload;
+            }
+
+            @Override
+            public void dragStop(InputEvent event, float x, float y, int pointer, DragAndDrop.Payload payload, DragAndDrop.Target target) {
+                super.dragStop(event, x, y, pointer, payload, target);
+                if (target == null) {
+                    dndIngredient.getDragActor().setPosition(originalPos.x, originalPos.y);
+                }
+            }
+        });
     }
 
     private void process() {
