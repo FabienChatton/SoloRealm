@@ -15,4 +15,8 @@ public abstract class IngredientCard implements GetAssetResource {
     public String getAssetRecourcePath() {
         return String.format("ingredients/%s_%s.png", ingredientMaterial.toString(), ingredientType.toString()).toLowerCase();
     }
+
+    public IngredientType getIngredientType() {
+        return ingredientType;
+    }
 }

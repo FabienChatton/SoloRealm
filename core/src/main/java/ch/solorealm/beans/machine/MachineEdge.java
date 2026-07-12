@@ -32,4 +32,28 @@ public class MachineEdge {
     public void setChildNode(MachineNode childNode) {
         this.childNode = childNode;
     }
+
+    public boolean isDropValide(IngredientCard ingredientCard, boolean input) {
+        if (input) {
+            return ingredientCard.getIngredientType() == inputType;
+        } else {
+            return ingredientCard.getIngredientType() == outputType;
+        }
+    }
+
+    public void addIngredientCard(IngredientCard ingredientCard, boolean inputSlot) {
+        if (inputSlot) {
+            this.input = ingredientCard;
+        } else {
+            this.output = ingredientCard;
+        }
+    }
+
+    public void removeIngredientCard(boolean inputSlot) {
+        if (inputSlot) {
+            this.input = null;
+        } else {
+            this.output = null;
+        }
+    }
 }

@@ -171,6 +171,36 @@ public final class ContextWrk implements ContextUi {
                 }
             });
         }
+        for (MachineEdge machineEdge : card.edgeActorMap.keySet()) {
+            for (int i = 0; i < card.edgeActorMap.get(machineEdge).length; i++) {
+                Actor edgeArrowImage = card.edgeActorMap.get(machineEdge)[i];
+                if (edgeArrowImage == null) continue;
+                int finalI = i;
+                dndIngredient.addTarget(new DragAndDrop.Target(edgeArrowImage) {
+                    private boolean inputSlot = finalI % 2 == 0;
+                    @Override
+                    public boolean drag(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
+                        Object[] obj = (Object[]) payload.getObject();
+                        IngredientCard ingredientCard = (IngredientCard) obj[0];
+                        return machineEdge.isDropValide(ingredientCard, inputSlot);
+                    }
+
+                    @Override
+                    public void drop(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
+                        Object[] obj = (Object[]) payload.getObject();
+                        IngredientCard ingredientCard = (IngredientCard) obj[0];
+                        MachineEdge originalEdge = (MachineEdge) obj[1];
+                        boolean originalInputSlot = (boolean) obj[2];
+
+                        machineEdge.addIngredientCard(ingredientCard, inputSlot);
+                        originalEdge.removeIngredientCard(originalInputSlot);
+
+                        findActorMachineNode(machineEdge.getNode()).addActorIngredientCard(machineEdge, payload.getDragActor(), inputSlot);
+                        findActorMachineNode(originalEdge.getNode()).removeActor(payload.getDragActor());
+                    }
+                });
+            }
+        }
     }
 
     @Override
@@ -187,6 +217,7 @@ public final class ContextWrk implements ContextUi {
             public DragAndDrop.Payload dragStart(InputEvent inputEvent, float x, float y, int pointer) {
                 DragAndDrop.Payload payload = new DragAndDrop.Payload();
                 payload.setDragActor(ingredientActor);
+                payload.setObject(new Object[]{ingredientCard, edge, inputSlot});
                 dndIngredient.setDragActorPosition(-ingredientActor.getParent().getX() + ingredientActor.getWidth() / 2, -ingredientActor.getParent().getY() - ingredientActor.getHeight() / 2);
                 originalPos.set(ingredientActor.getX(), ingredientActor.getY());
                 deltaPos.set(ingredientActor.getX(), ingredientActor.getY());

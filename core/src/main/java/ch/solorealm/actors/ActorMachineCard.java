@@ -22,10 +22,10 @@ import java.util.Map;
 
 public class ActorMachineCard extends Table implements GetCardChildren {
     public final MachineNode data;
-    private final Image icon;
     public final Actor[] edgeDropActor;
+    public final Map<MachineEdge, Actor[]> edgeActorMap;
+    private final Image icon;
     private final List<ActorMachineCard> cardActorChild;
-    private final Map<MachineEdge, Actor[]> edgeActorMap;
     private Table edgeTable;
     private GetCardChildren cardActorParent;
     private Actor edgeParentActor;
@@ -162,7 +162,7 @@ public class ActorMachineCard extends Table implements GetCardChildren {
     public void addActorIngredientCard(MachineEdge edge, Actor ingredientActor, boolean inputSlot) {
         Actor edgeActor = getEdgeActor(edge, inputSlot);
         if (edgeActor == null) return;
-        Vector2 edgeTablePos = edgeActor.getParent().getParent().localToParentCoordinates(Vector2.Zero);
+        Vector2 edgeTablePos = edgeActor.getParent().getParent().localToParentCoordinates(new Vector2(0, 0));
         ingredientActor.setPosition(edgeActor.getX(), edgeTablePos.y);
         addActor(ingredientActor);
     }
