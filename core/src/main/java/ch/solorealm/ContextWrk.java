@@ -175,9 +175,8 @@ public final class ContextWrk implements ContextUi {
             for (int i = 0; i < card.edgeActorMap.get(machineEdge).length; i++) {
                 Actor edgeArrowImage = card.edgeActorMap.get(machineEdge)[i];
                 if (edgeArrowImage == null) continue;
-                int finalI = i;
+                final boolean inputSlot = i % 2 == 0;
                 dndIngredient.addTarget(new DragAndDrop.Target(edgeArrowImage) {
-                    private boolean inputSlot = finalI % 2 == 0;
                     @Override
                     public boolean drag(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
                         Object[] obj = (Object[]) payload.getObject();
@@ -189,14 +188,10 @@ public final class ContextWrk implements ContextUi {
                     public void drop(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
                         Object[] obj = (Object[]) payload.getObject();
                         IngredientCard ingredientCard = (IngredientCard) obj[0];
-                        MachineEdge originalEdge = (MachineEdge) obj[1];
-                        boolean originalInputSlot = (boolean) obj[2];
 
-                        machineEdge.addIngredientCard(ingredientCard, inputSlot);
-                        originalEdge.removeIngredientCard(originalInputSlot);
-
+                        findActorMachineNode(ingredientCard.edgeAttached.getNode()).removeActor(payload.getDragActor());
+                        ingredientCard.edgeAttached.moveIngredientCard(ingredientCard, machineEdge, inputSlot);
                         findActorMachineNode(machineEdge.getNode()).addActorIngredientCard(machineEdge, payload.getDragActor(), inputSlot);
-                        findActorMachineNode(originalEdge.getNode()).removeActor(payload.getDragActor());
                     }
                 });
             }
@@ -205,6 +200,7 @@ public final class ContextWrk implements ContextUi {
 
     @Override
     public void addActorIngredientCard(IngredientCard ingredientCard, MachineEdge edge, boolean inputSlot) {
+        ingredientCard.edgeAttached = edge;
         ActorMachineCard actorMachineNode = findActorMachineNode(edge.getNode());
         if (actorMachineNode == null) return;
         Image ingredientActor = new Image(context.assetManager.get(ingredientCard.getAssetRecourcePath(), Texture.class));
@@ -217,7 +213,7 @@ public final class ContextWrk implements ContextUi {
             public DragAndDrop.Payload dragStart(InputEvent inputEvent, float x, float y, int pointer) {
                 DragAndDrop.Payload payload = new DragAndDrop.Payload();
                 payload.setDragActor(ingredientActor);
-                payload.setObject(new Object[]{ingredientCard, edge, inputSlot});
+                payload.setObject(new Object[]{ingredientCard});
                 dndIngredient.setDragActorPosition(-ingredientActor.getParent().getX() + ingredientActor.getWidth() / 2, -ingredientActor.getParent().getY() - ingredientActor.getHeight() / 2);
                 originalPos.set(ingredientActor.getX(), ingredientActor.getY());
                 deltaPos.set(ingredientActor.getX(), ingredientActor.getY());

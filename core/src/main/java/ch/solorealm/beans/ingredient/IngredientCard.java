@@ -1,10 +1,12 @@
 package ch.solorealm.beans.ingredient;
 
 import ch.solorealm.beans.GetAssetResource;
+import ch.solorealm.beans.machine.MachineEdge;
 
 public abstract class IngredientCard implements GetAssetResource {
     private final IngredientMaterial ingredientMaterial;
     protected IngredientType ingredientType;
+    public MachineEdge edgeAttached;
 
     public IngredientCard(IngredientMaterial ingredientMaterial, IngredientType ingredientType) {
         this.ingredientType = ingredientType;

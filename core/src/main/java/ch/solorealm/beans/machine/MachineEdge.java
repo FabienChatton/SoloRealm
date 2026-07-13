@@ -41,19 +41,29 @@ public class MachineEdge {
         }
     }
 
-    public void addIngredientCard(IngredientCard ingredientCard, boolean inputSlot) {
-        if (inputSlot) {
-            this.input = ingredientCard;
+    public void moveIngredientCard(IngredientCard ingredientCard, MachineEdge dstEdge, boolean dstInputSlot) {
+        if (input == ingredientCard) {
+            input = null;
+        } else if (output == ingredientCard) {
+            output = null;
         } else {
-            this.output = ingredientCard;
+            System.err.println("Fail to move ingredient card. Can not find ingredient card "
+                + ingredientCard + " in " + this + " edge " + " in " + getNode() + " machine");
+            return;
         }
-    }
-
-    public void removeIngredientCard(boolean inputSlot) {
-        if (inputSlot) {
-            this.input = null;
+        if (dstInputSlot) {
+            if (dstEdge.input != null) {
+                System.err.println("Fail to move ingredient card. The destination edge input as already a ingredient");
+                return;
+            }
+            dstEdge.input = ingredientCard;
         } else {
-            this.output = null;
+            if (dstEdge.output != null) {
+                System.err.println("Fail to move ingredient card. The destination edge output as already a ingredient");
+                return;
+            }
+            dstEdge.output = ingredientCard;
         }
+        ingredientCard.edgeAttached = dstEdge;
     }
 }
