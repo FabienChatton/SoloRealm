@@ -179,19 +179,25 @@ public final class ContextWrk implements ContextUi {
                 dndIngredient.addTarget(new DragAndDrop.Target(edgeArrowImage) {
                     @Override
                     public boolean drag(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
-                        Object[] obj = (Object[]) payload.getObject();
-                        IngredientCard ingredientCard = (IngredientCard) obj[0];
+                        IngredientCard ingredientCard = (IngredientCard) payload.getObject();
                         return machineEdge.isDropValide(ingredientCard, inputSlot);
                     }
 
                     @Override
                     public void drop(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
-                        Object[] obj = (Object[]) payload.getObject();
-                        IngredientCard ingredientCard = (IngredientCard) obj[0];
+                        IngredientCard ingredientCard = (IngredientCard) payload.getObject();
 
-                        findActorMachineNode(ingredientCard.edgeAttached.getNode()).removeActor(payload.getDragActor());
+                        ActorMachineCard srcMachineCard = findActorMachineNode(ingredientCard.edgeAttached.getNode());
+                        ActorMachineCard dstMachineCard = findActorMachineNode(machineEdge.getNode());
+                        Actor dragActor = payload.getDragActor();
+                        srcMachineCard.ingredientActorCards.remove(dragActor);
+                        dragActor.remove();
+
                         ingredientCard.edgeAttached.moveIngredientCard(ingredientCard, machineEdge, inputSlot);
-                        findActorMachineNode(machineEdge.getNode()).addActorIngredientCard(machineEdge, payload.getDragActor(), inputSlot);
+
+                        dstMachineCard.ingredientActorCards.add(dragActor);
+                        dstMachineCard.addActorIngredientCard(machineEdge, dragActor, inputSlot);
+                        dragActor.moveBy(-dragActor.getWidth(), -dragActor.getHeight());
                     }
                 });
             }
@@ -200,10 +206,11 @@ public final class ContextWrk implements ContextUi {
 
     @Override
     public void addActorIngredientCard(IngredientCard ingredientCard, MachineEdge edge, boolean inputSlot) {
-        ingredientCard.edgeAttached = edge;
         ActorMachineCard actorMachineNode = findActorMachineNode(edge.getNode());
         if (actorMachineNode == null) return;
         Image ingredientActor = new Image(context.assetManager.get(ingredientCard.getAssetRecourcePath(), Texture.class));
+        ingredientActor.setUserObject(ingredientCard);
+        actorMachineNode.ingredientActorCards.add(ingredientActor);
         actorMachineNode.addActorIngredientCard(edge, ingredientActor, inputSlot);
         ingredientActor.setTouchable(Touchable.enabled);
         dndIngredient.addSource(new DragAndDrop.Source(ingredientActor) {
@@ -213,7 +220,7 @@ public final class ContextWrk implements ContextUi {
             public DragAndDrop.Payload dragStart(InputEvent inputEvent, float x, float y, int pointer) {
                 DragAndDrop.Payload payload = new DragAndDrop.Payload();
                 payload.setDragActor(ingredientActor);
-                payload.setObject(new Object[]{ingredientCard});
+                payload.setObject(ingredientCard);
                 dndIngredient.setDragActorPosition(-ingredientActor.getParent().getX() + ingredientActor.getWidth() / 2, -ingredientActor.getParent().getY() - ingredientActor.getHeight() / 2);
                 originalPos.set(ingredientActor.getX(), ingredientActor.getY());
                 deltaPos.set(ingredientActor.getX(), ingredientActor.getY());
@@ -229,6 +236,15 @@ public final class ContextWrk implements ContextUi {
                 }
             }
         });
+    }
+
+    @Override
+    public void clearActorIngredientCard(MachineNode machineNode) {
+        ActorMachineCard actorMachineNode = findActorMachineNode(machineNode);
+        for (Actor ingredientActorCard : actorMachineNode.ingredientActorCards) {
+            ingredientActorCard.remove();
+        }
+        actorMachineNode.ingredientActorCards.clear();
     }
 
     private void process() {

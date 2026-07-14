@@ -18,6 +18,7 @@ public class MiningMachine extends MachineNode {
         MachineEdge edge = edges[0];
         if (edge.output == null) {
             IngredientCard ingredient = material.ingredientConstructor.apply(IngredientType.ORE);
+            ingredient.edgeAttached = edge;
             edge.output = ingredient;
             contextUi.addActorIngredientCard(ingredient, edge, false);
         }

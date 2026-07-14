@@ -35,9 +35,9 @@ public class MachineEdge {
 
     public boolean isDropValide(IngredientCard ingredientCard, boolean input) {
         if (input) {
-            return ingredientCard.getIngredientType() == inputType;
+            return ingredientCard.ingredientType == inputType;
         } else {
-            return ingredientCard.getIngredientType() == outputType;
+            return ingredientCard.ingredientType == outputType;
         }
     }
 

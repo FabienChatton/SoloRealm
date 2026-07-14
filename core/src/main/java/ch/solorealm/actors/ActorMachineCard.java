@@ -15,15 +15,13 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.utils.Align;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ActorMachineCard extends Table implements GetCardChildren {
     public final MachineNode data;
     public final Actor[] edgeDropActor;
     public final Map<MachineEdge, Actor[]> edgeActorMap;
+    public final Collection<Actor> ingredientActorCards;
     private final Image icon;
     private final List<ActorMachineCard> cardActorChild;
     private Table edgeTable;
@@ -35,6 +33,7 @@ public class ActorMachineCard extends Table implements GetCardChildren {
         this.data = data;
         this.icon = new Image(iconTexture);
         this.cardActorChild = new ArrayList<>();
+        this.ingredientActorCards = new HashSet<>();
         this.edgeActorMap = new HashMap<>();
 
         float edgeWidth = backgroundTexture.getWidth() * SCALE_FACTOR;
@@ -162,9 +161,9 @@ public class ActorMachineCard extends Table implements GetCardChildren {
     public void addActorIngredientCard(MachineEdge edge, Actor ingredientActor, boolean inputSlot) {
         Actor edgeActor = getEdgeActor(edge, inputSlot);
         if (edgeActor == null) return;
-        Vector2 edgeTablePos = edgeActor.getParent().getParent().localToParentCoordinates(new Vector2(0, 0));
-        ingredientActor.setPosition(edgeActor.getX(), edgeTablePos.y);
-        addActor(ingredientActor);
+        Vector2 edgeActorCoords = edgeActor.localToStageCoordinates(new Vector2(0, 0));
+        ingredientActor.setPosition(edgeActorCoords.x, edgeActorCoords.y);
+        getStage().addActor(ingredientActor);
     }
 
     private Actor getEdgeActor(MachineEdge edge, boolean inputSlot) {
