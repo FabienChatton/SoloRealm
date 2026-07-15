@@ -20,10 +20,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.Set;
+import java.util.*;
 
 public final class ContextWrk implements ContextUi {
     private final Context context;
@@ -132,6 +129,7 @@ public final class ContextWrk implements ContextUi {
                     for (ActorMachineCard cardChild : card.getCardChildren()) {
                         cardChild.setParentActorR();
                     }
+                    card.updateIngredientActors();
                 }
             }
 
@@ -140,6 +138,10 @@ public final class ContextWrk implements ContextUi {
                 deltaPos.set(card.getX() - deltaPos.x, card.getY() - deltaPos.y);
                 for (ActorMachineCard cardChild : card.getCardChildren()) {
                     cardChild.moveByR(deltaPos.x, deltaPos.y);
+                }
+                for (Actor ingredientActorCard : card.ingredientActorCards) {
+                    ingredientActorCard.moveBy(deltaPos.x, deltaPos.y);
+                    ingredientActorCard.toFront();
                 }
                 deltaPos.set(card.getX(), card.getY());
             }
@@ -216,6 +218,7 @@ public final class ContextWrk implements ContextUi {
         dndIngredient.addSource(new DragAndDrop.Source(ingredientActor) {
             private final Vector2 originalPos = new Vector2();
             private final Vector2 deltaPos = new Vector2();
+            private final Collection<Actor> valideDropActors = new HashSet<>();
             @Override
             public DragAndDrop.Payload dragStart(InputEvent inputEvent, float x, float y, int pointer) {
                 DragAndDrop.Payload payload = new DragAndDrop.Payload();
@@ -225,6 +228,17 @@ public final class ContextWrk implements ContextUi {
                 originalPos.set(ingredientActor.getX(), ingredientActor.getY());
                 deltaPos.set(ingredientActor.getX(), ingredientActor.getY());
                 ingredientActor.toFront();
+
+                //valide drop color
+                for (ActorMachineCard actorMachineCard : getAllActorMachineNode()) {
+                    for (MachineEdge machineEdge : actorMachineCard.data.edges) {
+                        if (machineEdge.isDropValide(ingredientCard, true)) {
+                            Actor valideDropActor = actorMachineCard.edgeActorMap.get(machineEdge)[0];
+                            valideDropActor.setColor(0.62f,0.95f,1f, 1f);
+                            valideDropActors.add(valideDropActor);
+                        }
+                    }
+                }
                 return payload;
             }
 
@@ -233,6 +247,9 @@ public final class ContextWrk implements ContextUi {
                 super.dragStop(event, x, y, pointer, payload, target);
                 if (target == null) {
                     dndIngredient.getDragActor().setPosition(originalPos.x, originalPos.y);
+                }
+                for (Actor valideDropActor : valideDropActors) {
+                    valideDropActor.setColor(Color.WHITE);
                 }
             }
         });

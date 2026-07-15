@@ -33,11 +33,11 @@ public class MachineEdge {
         this.childNode = childNode;
     }
 
-    public boolean isDropValide(IngredientCard ingredientCard, boolean input) {
-        if (input) {
-            return ingredientCard.ingredientType == inputType;
+    public boolean isDropValide(IngredientCard ingredientCard, boolean inputSlot) {
+        if (inputSlot) {
+            return ingredientCard.ingredientType == inputType && this.input == null;
         } else {
-            return ingredientCard.ingredientType == outputType;
+            return false;
         }
     }
 

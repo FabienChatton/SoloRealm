@@ -1,5 +1,6 @@
 package ch.solorealm.actors;
 
+import ch.solorealm.beans.ingredient.IngredientCard;
 import ch.solorealm.beans.machine.MachineEdge;
 import ch.solorealm.beans.machine.MachineNode;
 import com.badlogic.gdx.graphics.Color;
@@ -143,6 +144,7 @@ public class ActorMachineCard extends Table implements GetCardChildren {
         for (ActorMachineCard cardChild : getCardChildren()) {
             cardChild.setParentActorR();
         }
+        updateIngredientActors();
     }
 
     @Override
@@ -156,6 +158,7 @@ public class ActorMachineCard extends Table implements GetCardChildren {
         }
         toFront();
         moveBy(x, y);
+        updateIngredientActors();
     }
 
     public void addActorIngredientCard(MachineEdge edge, Actor ingredientActor, boolean inputSlot) {
@@ -163,7 +166,25 @@ public class ActorMachineCard extends Table implements GetCardChildren {
         if (edgeActor == null) return;
         Vector2 edgeActorCoords = edgeActor.localToStageCoordinates(new Vector2(0, 0));
         ingredientActor.setPosition(edgeActorCoords.x, edgeActorCoords.y);
+        if (ingredientActor.getWidth() < 48) {
+            float scale = 48f / ingredientActor.getWidth();
+            ingredientActor.setSize(ingredientActor.getWidth() * scale, ingredientActor.getWidth() * scale);
+        }
         getStage().addActor(ingredientActor);
+    }
+
+    public void updateIngredientActors() {
+        for (Actor ingredientActor : ingredientActorCards) {
+            IngredientCard ingredientCard = (IngredientCard) ingredientActor.getUserObject();
+            boolean inputSlot = ingredientCard.edgeAttached.input == ingredientCard;
+            Actor edgeActor = getEdgeActor(ingredientCard.edgeAttached, inputSlot);
+            Vector2 edgeActorCoords = edgeActor.localToStageCoordinates(new Vector2(0, 0));
+            ingredientActor.setPosition(edgeActorCoords.x, edgeActorCoords.y);
+            if (inputSlot) {
+                ingredientActor.moveBy(-ingredientActor.getWidth(), -ingredientActor.getHeight());
+            }
+            ingredientActor.toFront();
+        }
     }
 
     private Actor getEdgeActor(MachineEdge edge, boolean inputSlot) {
