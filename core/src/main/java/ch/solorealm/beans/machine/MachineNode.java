@@ -3,6 +3,7 @@ package ch.solorealm.beans.machine;
 import ch.solorealm.beans.ContextUi;
 import ch.solorealm.beans.GetAssetResource;
 import ch.solorealm.beans.ingredient.IngredientCard;
+import ch.solorealm.beans.ingredient.IngredientMaterial;
 
 public abstract class MachineNode implements GetAssetResource {
     public final MachineEdge[] edges;
@@ -19,7 +20,7 @@ public abstract class MachineNode implements GetAssetResource {
         // all edge input must be full
         // all edge output must be empty
         for (MachineEdge edge : edges) {
-            if (edge.input == null) return;
+            if (edge.input == null && edge.exNihiloMaterial == null) return;
             if (edge.output != null) return;
         }
         contextUi.clearActorIngredientCard(this);
@@ -28,11 +29,17 @@ public abstract class MachineNode implements GetAssetResource {
                 edge.input = null;
                 continue;
             }
-            IngredientCard newCardTransformed = edge.input.ingredientMaterial.ingredientConstructor.apply(edge.outputType);
+            IngredientMaterial material;
+            if (edge.input == null) {
+                material = edge.exNihiloMaterial;
+            } else {
+                material = edge.input.ingredientMaterial;
+            }
+            IngredientCard newCardTransformed = material.ingredientConstructor.apply(edge.outputType);
             newCardTransformed.edgeAttached = edge;
-            contextUi.addActorIngredientCard(newCardTransformed, edge, false);
             edge.input = null;
             edge.output = newCardTransformed;
+            contextUi.addActorIngredientCard(newCardTransformed, edge, false);
         }
     }
 

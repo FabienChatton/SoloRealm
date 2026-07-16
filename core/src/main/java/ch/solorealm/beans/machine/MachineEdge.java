@@ -1,6 +1,7 @@
 package ch.solorealm.beans.machine;
 
 import ch.solorealm.beans.ingredient.IngredientCard;
+import ch.solorealm.beans.ingredient.IngredientMaterial;
 import ch.solorealm.beans.ingredient.IngredientType;
 
 public class MachineEdge {
@@ -11,6 +12,7 @@ public class MachineEdge {
     public final IngredientType outputType;
     public IngredientCard input;
     public IngredientCard output;
+    public IngredientMaterial exNihiloMaterial;
 
     public MachineEdge(IngredientType inputType, IngredientType outputType) {
         this.inputType = inputType;
