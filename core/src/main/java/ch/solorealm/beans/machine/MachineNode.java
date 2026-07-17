@@ -11,12 +11,26 @@ public abstract class MachineNode implements GetAssetResource {
 
     public MachineNode(MachineEdge[] edges) {
         this.edges = edges;
-        for (MachineEdge edge : edges) {
+        for (int i = 0; i < edges.length; i++) {
+            MachineEdge edge = edges[i];
             edge.setNode(this);
+            edge.setEdgeIndex(i);
         }
     }
 
     public void process(ContextUi contextUi) {
+        // move output to destination parent input
+        for (MachineEdge edge : edges) {
+            IngredientCard cardToMove = edge.output;
+            if (cardToMove != null) {
+                MachineEdge destinationParentEdge = edge.getDestinationParentEdge();
+                if (destinationParentEdge != null && destinationParentEdge.isDropValide(cardToMove, true)) {
+                    contextUi.moveActorIngredientCard(cardToMove, edge, destinationParentEdge, true);
+                }
+            }
+        }
+
+
         // all edge input must be full
         // all edge output must be empty
         for (MachineEdge edge : edges) {
@@ -25,6 +39,7 @@ public abstract class MachineNode implements GetAssetResource {
         }
         contextUi.clearActorIngredientCard(this);
         for (MachineEdge edge : edges) {
+            // process "craft"
             if (edge.outputType == null) {
                 edge.input = null;
                 continue;

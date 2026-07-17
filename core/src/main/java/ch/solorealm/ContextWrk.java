@@ -14,6 +14,8 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
+import com.badlogic.gdx.scenes.scene2d.actions.ScaleToAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
@@ -188,22 +190,43 @@ public final class ContextWrk implements ContextUi {
                     @Override
                     public void drop(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
                         IngredientCard ingredientCard = (IngredientCard) payload.getObject();
-
-                        ActorMachineCard srcMachineCard = findActorMachineNode(ingredientCard.edgeAttached.getNode());
-                        ActorMachineCard dstMachineCard = findActorMachineNode(machineEdge.getNode());
-                        Actor dragActor = payload.getDragActor();
-                        srcMachineCard.ingredientActorCards.remove(dragActor);
-                        dragActor.remove();
-
-                        ingredientCard.edgeAttached.moveIngredientCard(ingredientCard, machineEdge, inputSlot);
-
-                        dstMachineCard.ingredientActorCards.add(dragActor);
-                        dstMachineCard.addActorIngredientCard(machineEdge, dragActor, inputSlot);
-                        dragActor.moveBy(-dragActor.getWidth(), -dragActor.getHeight());
+                        moveActorIngredientCard(ingredientCard, ingredientCard.edgeAttached, machineEdge, inputSlot);
                     }
                 });
             }
         }
+    }
+
+    @Override
+    public void moveActorIngredientCard(IngredientCard ingredientCard, MachineEdge srcEdge, MachineEdge dstEdge, boolean dstInputSlot) {
+        ActorMachineCard srcMachineCard = findActorMachineNode(ingredientCard.edgeAttached.getNode());
+        ActorMachineCard dstMachineCard = findActorMachineNode(dstEdge.getNode());
+        Actor ingredientActorCard = null;
+        for (Actor actor : srcMachineCard.ingredientActorCards) {
+            IngredientCard card = (IngredientCard) actor.getUserObject();
+            if (card == ingredientCard) {
+                ingredientActorCard = actor;
+                break;
+            }
+        }
+
+        Vector2 srcPos = new Vector2(ingredientActorCard.getX(), ingredientActorCard.getY());
+
+        srcMachineCard.ingredientActorCards.remove(ingredientActorCard);
+        ingredientActorCard.remove();
+
+        srcEdge.moveIngredientCard(ingredientCard, dstEdge, dstInputSlot);
+
+        dstMachineCard.ingredientActorCards.add(ingredientActorCard);
+        dstMachineCard.addActorIngredientCard(dstEdge, ingredientActorCard, dstInputSlot);
+        ingredientActorCard.moveBy(-ingredientActorCard.getWidth(), -ingredientActorCard.getHeight());
+
+        Vector2 dstPos = new Vector2(ingredientActorCard.getX(), ingredientActorCard.getY());
+        ingredientActorCard.setPosition(srcPos.x, srcPos.y);
+        MoveToAction moveToAction = new MoveToAction();
+        moveToAction.setPosition(dstPos.x, dstPos.y);
+        moveToAction.setDuration(0.2f);
+        ingredientActorCard.addAction(moveToAction);
     }
 
     @Override
@@ -215,6 +238,13 @@ public final class ContextWrk implements ContextUi {
         actorMachineNode.ingredientActorCards.add(ingredientActor);
         actorMachineNode.addActorIngredientCard(edge, ingredientActor, inputSlot);
         ingredientActor.setTouchable(Touchable.enabled);
+
+        ingredientActor.setOrigin(ingredientActor.getWidth() / 2f, ingredientActor.getHeight() / 2f);
+        ingredientActor.setScale(0);
+        ScaleToAction scaleToAction = new ScaleToAction();
+        scaleToAction.setScale(1);
+        scaleToAction.setDuration(0.2f);
+        ingredientActor.addAction(scaleToAction);
         dndIngredient.addSource(new DragAndDrop.Source(ingredientActor) {
             private final Vector2 originalPos = new Vector2();
             private final Vector2 deltaPos = new Vector2();

@@ -6,5 +6,6 @@ import ch.solorealm.beans.machine.MachineNode;
 
 public interface ContextUi {
     void addActorIngredientCard(IngredientCard ingredientCard, MachineEdge edge, boolean inputSlot);
+    void moveActorIngredientCard(IngredientCard ingredientCard, MachineEdge srcEdge, MachineEdge dstEdge, boolean dstInputSlot);
     void clearActorIngredientCard(MachineNode machineNode);
 }

@@ -7,6 +7,7 @@ import ch.solorealm.beans.ingredient.IngredientType;
 public class MachineEdge {
     private MachineNode node;
     private MachineNode childNode;
+    private int edgeIndex;
 
     public final IngredientType inputType;
     public final IngredientType outputType;
@@ -21,6 +22,10 @@ public class MachineEdge {
 
     public void setNode(MachineNode node) {
         this.node = node;
+    }
+
+    public void setEdgeIndex(int edgeIndex) {
+        this.edgeIndex = edgeIndex;
     }
 
     public MachineNode getNode() {
@@ -67,5 +72,15 @@ public class MachineEdge {
             dstEdge.output = ingredientCard;
         }
         ingredientCard.edgeAttached = dstEdge;
+    }
+
+    public MachineEdge getDestinationParentEdge() {
+        MachineEdge[] parentEdges = getNode().getParent().getNode().edges;
+        for (MachineEdge parentEdge : parentEdges) {
+            if (parentEdge.getChildNode() != null && parentEdge.getChildNode().edges[edgeIndex] == this) {
+                return parentEdge;
+            }
+        }
+        return null;
     }
 }
