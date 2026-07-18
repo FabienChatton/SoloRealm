@@ -64,6 +64,7 @@ public final class ContextWrk implements ContextUi {
                 public void drop(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
                     ActorMachineCard machineCard = (ActorMachineCard) source.getActor();
                     machineCard.setParentActor(rootActor);
+                    updateActorMachineCardPos();
                 }
             });
         }
@@ -91,6 +92,8 @@ public final class ContextWrk implements ContextUi {
         createActorMachineCard(new FurnaceMachine(), tableau.rootActors[2]);
         createActorMachineCard(new AssemblingMachine(), tableau.rootActors[3]);
         createActorMachineCard(new MiningMachine(IngredientMaterial.COPPER), tableau.rootActors[5]);
+
+        updateActorMachineCardPos();
     }
 
     public ActorMachineCard createActorMachineCard(MachineNode data) {
@@ -128,10 +131,7 @@ public final class ContextWrk implements ContextUi {
                 super.dragStop(event, x, y, pointer, payload, target);
                 if (target == null) {
                     dndMachine.getDragActor().setPosition(originalPos.x, originalPos.y);
-                    for (ActorMachineCard cardChild : card.getCardChildren()) {
-                        cardChild.setParentActorR();
-                    }
-                    card.updateIngredientActors();
+                    updateActorMachineCardPos();
                 }
             }
 
@@ -172,6 +172,7 @@ public final class ContextWrk implements ContextUi {
                 public void drop(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
                     ActorMachineCard dst = (ActorMachineCard) source.getActor();
                     dst.setParentActor(card, card.data.edges[finalI], dropActor);
+                    updateActorMachineCardPos();
                 }
             });
         }
@@ -292,6 +293,28 @@ public final class ContextWrk implements ContextUi {
             ingredientActorCard.remove();
         }
         actorMachineNode.ingredientActorCards.clear();
+    }
+
+    private void updateActorMachineCardPos() {
+        Queue<ActorMachineCard> actors = new LinkedList<>();
+        for (RootActor rootActor : tableau.rootActors) {
+            actors.addAll(rootActor.getCardChildren());
+        }
+        while (!actors.isEmpty()) {
+            ActorMachineCard actorMachineCard = actors.poll();
+            actorMachineCard.updateCardPos();
+            actorMachineCard.toFront();
+            actorMachineCard.updateIngredientActors();
+            for (MachineEdge edge : actorMachineCard.data.edges) {
+                MachineNode node = edge.getChildNode();
+                if (node != null) {
+                    ActorMachineCard actorMachineNode = findActorMachineNode(node);
+                    if (actorMachineNode != null) {
+                        actors.add(actorMachineNode);
+                    }
+                }
+            }
+        }
     }
 
     private void process() {

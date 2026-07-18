@@ -117,7 +117,6 @@ public class ActorMachineCard extends Table implements GetCardChildren {
         data.setParent(rootActor.data.edges[0]);
         data.getParent().setChildNode(data);
         rootActor.validate();
-        setParentActorR();
     }
 
     public void setParentActor(ActorMachineCard newParentCard, MachineEdge edge, Actor edgeParentActor) {
@@ -130,21 +129,15 @@ public class ActorMachineCard extends Table implements GetCardChildren {
         data.getParent().setChildNode(data);
         validate();
         this.edgeParentActor = edgeParentActor;
-        setParentActorR();
     }
 
-    public void setParentActorR() {
+    public void updateCardPos() {
         int padY = 0;
         if (cardActorParent != edgeParentActor) {
             padY = -80;
         }
         Vector2 stageCoordinate = edgeParentActor.localToStageCoordinates(new Vector2(0, padY));
         setPosition(stageCoordinate.x, stageCoordinate.y);
-        toFront();
-        for (ActorMachineCard cardChild : getCardChildren()) {
-            cardChild.setParentActorR();
-        }
-        updateIngredientActors();
     }
 
     @Override
@@ -153,10 +146,10 @@ public class ActorMachineCard extends Table implements GetCardChildren {
     }
 
     public void moveByR(float x, float y) {
+        toFront();
         for (ActorMachineCard cardChild : getCardChildren()) {
             cardChild.moveByR(x, y);
         }
-        toFront();
         moveBy(x, y);
         updateIngredientActors();
     }
