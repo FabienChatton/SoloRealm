@@ -2,6 +2,7 @@ package ch.solorealm;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -12,12 +13,14 @@ public class Context implements Disposable {
     public final Skin skin;
     public final Stage stage;
     public final ContextWrk contextWrk;
+    public final SoundsManager soundsManager;
 
     public Context(Stage stage) {
         assetManager = new AssetManager();
         skin = new Skin(Gdx.files.internal("ui/uiskin.json"));
         this.stage = stage;
         contextWrk = new ContextWrk(this);
+        soundsManager = new SoundsManager(this);
     }
 
     public void initializeGame() {
@@ -33,6 +36,11 @@ public class Context implements Disposable {
         assetManager.load("machines/Grid_Overclocker_Upgrade.png", Texture.class);
         assetManager.load("cards/empty_root.png", Texture.class);
         assetManager.load("machines/Assembling_Machine.png", Texture.class);
+        assetManager.load("sounds/cloth2.mp3", Sound.class);
+        assetManager.load("sounds/cloth3.mp3", Sound.class);
+        assetManager.load("sounds/exp.mp3", Sound.class);
+        assetManager.load("sounds/stone1.mp3", Sound.class);
+        assetManager.load("sounds/stone2.mp3", Sound.class);
         assetManager.finishLoading();
 
     }

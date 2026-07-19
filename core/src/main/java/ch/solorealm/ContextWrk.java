@@ -65,6 +65,7 @@ public final class ContextWrk implements ContextUi {
                     ActorMachineCard machineCard = (ActorMachineCard) source.getActor();
                     machineCard.setParentActor(rootActor);
                     updateActorMachineCardPos();
+                    context.soundsManager.playCardDragDrop();
                 }
             });
         }
@@ -124,6 +125,7 @@ public final class ContextWrk implements ContextUi {
                 originalPos.set(card.getX(), card.getY());
                 deltaPos.set(card.getX(), card.getY());
                 card.toFront();
+                context.soundsManager.playCardDragStart();
                 return payload;
             }
             @Override
@@ -173,6 +175,7 @@ public final class ContextWrk implements ContextUi {
                     ActorMachineCard dst = (ActorMachineCard) source.getActor();
                     dst.setParentActor(card, card.data.edges[finalI], dropActor);
                     updateActorMachineCardPos();
+                    context.soundsManager.playCardDragDrop();
                 }
             });
         }
@@ -192,6 +195,7 @@ public final class ContextWrk implements ContextUi {
                     public void drop(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
                         IngredientCard ingredientCard = (IngredientCard) payload.getObject();
                         moveActorIngredientCard(ingredientCard, ingredientCard.edgeAttached, machineEdge, inputSlot);
+                        context.soundsManager.playIngredientDragDrop();
                     }
                 });
             }
@@ -270,6 +274,7 @@ public final class ContextWrk implements ContextUi {
                         }
                     }
                 }
+                context.soundsManager.playIngredientDragStart();
                 return payload;
             }
 
@@ -319,6 +324,7 @@ public final class ContextWrk implements ContextUi {
 
     private void process() {
         tableau.data.process(this);
+        context.soundsManager.playProcess();
     }
 
     private Set<ActorMachineCard> getAllActorMachineNode() {
