@@ -32,7 +32,7 @@ public class Context implements Disposable {
         assetManager.load("cards/empty_card.png", Texture.class);
         assetManager.load("ingredients/copper_ingot.png", Texture.class);
         assetManager.load("ingredients/copper_ore.png", Texture.class);
-        assetManager.load("machines/furnace.png", Texture.class);
+        assetManager.load("machines/Furnace.png", Texture.class);
         assetManager.load("machines/Grid_Overclocker_Upgrade.png", Texture.class);
         assetManager.load("cards/empty_root.png", Texture.class);
         assetManager.load("machines/Assembling_Machine.png", Texture.class);
@@ -41,6 +41,7 @@ public class Context implements Disposable {
         assetManager.load("sounds/exp.mp3", Sound.class);
         assetManager.load("sounds/stone1.mp3", Sound.class);
         assetManager.load("sounds/stone2.mp3", Sound.class);
+        assetManager.load("bg/bg.jpg", Texture.class);
         assetManager.finishLoading();
 
     }

@@ -7,6 +7,7 @@ import ch.solorealm.beans.ContextUi;
 import ch.solorealm.beans.RootGrid;
 import ch.solorealm.beans.ingredient.IngredientCard;
 import ch.solorealm.beans.ingredient.IngredientMaterial;
+import ch.solorealm.beans.ingredient.IngredientType;
 import ch.solorealm.beans.machine.*;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
@@ -29,6 +30,7 @@ public final class ContextWrk implements ContextUi {
     private final DragAndDrop dndMachine;
     private final DragAndDrop dndIngredient;
     private RootGridActor tableau;
+    private RootGridActor foundation;
 
     public ContextWrk(Context context) {
         this.context = context;
@@ -64,13 +66,13 @@ public final class ContextWrk implements ContextUi {
                 public void drop(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
                     ActorMachineCard machineCard = (ActorMachineCard) source.getActor();
                     machineCard.setParentActor(rootActor);
-                    updateActorMachineCardPos();
+                    updateGridActorMachineCardPos();
                     context.soundsManager.playCardDragDrop();
                 }
             });
         }
 
-        tableau.setPosition(500, 700);
+        tableau.setPosition(480, 700);
         tableau.validate();
         context.stage.addActor(tableau);
 
@@ -88,24 +90,114 @@ public final class ContextWrk implements ContextUi {
         });
         context.stage.addActor(processButton);
 
+        foundation = new RootGridActor(new RootGrid(3), context.skin, context.assetManager.get("cards/empty_root.png"));
+        foundation.setPosition(1230, 700);
+        foundation.validate();
+        context.stage.addActor(foundation);
+
+        addActorFoundationCard(new FoundationNode(IngredientType.INGOT, IngredientMaterial.COPPER), foundation.rootActors[0]);
+        updateFoundationNode();
+
+        Image bgImage = new Image(context.assetManager.get("bg/bg.jpg", Texture.class));
+        bgImage.setSize(1488, 837);
+        context.stage.addActor(bgImage);
+        bgImage.toBack();
+
+
         // test
-        createActorMachineCard(new AssemblingMachine(), tableau.rootActors[0]);
-        createActorMachineCard(new FurnaceMachine(), tableau.rootActors[2]);
-        createActorMachineCard(new AssemblingMachine(), tableau.rootActors[3]);
-        createActorMachineCard(new MiningMachine(IngredientMaterial.COPPER), tableau.rootActors[5]);
+        addActorMachineCard(new AssemblingMachine(), tableau.rootActors[0]);
+        addActorMachineCard(new FurnaceMachine(), tableau.rootActors[2]);
+        addActorMachineCard(new AssemblingMachine(), tableau.rootActors[3]);
+        addActorMachineCard(new MiningMachine(IngredientMaterial.COPPER), tableau.rootActors[5]);
 
-        updateActorMachineCardPos();
+        updateGridActorMachineCardPos();
     }
 
-    public ActorMachineCard createActorMachineCard(MachineNode data) {
-        return new ActorMachineCard(context.skin, data, context.assetManager.get(data.getAssetRecourcePath()), context.assetManager.get("cards/empty_card.png"), context.assetManager.get("machines/Grid_Overclocker_Upgrade.png"));
+    public ActorMachineCard createActorMachineCard(ActorMachineCard.Parameter parameter) {
+        return new ActorMachineCard(parameter);
     }
 
-    public void createActorMachineCard(MachineNode data, RootActor parent) {
-        ActorMachineCard card = createActorMachineCard(data);
+    public void addActorMachineCard(MachineNode data, RootActor parent) {
+        ActorMachineCard card = createActorMachineCard(new ActorMachineCard.Parameter(context.skin, data,
+            context.assetManager.get(data.getAssetRecourcePath()),
+            context.assetManager.get("cards/empty_card.png"),
+            context.assetManager.get("machines/Grid_Overclocker_Upgrade.png")));
         card.setParentActor(parent);
         context.stage.addActor(card);
 
+        addDndMachineSrc(card);
+        addDndMachineDst(card);
+        addDndIngredientDst(card);
+    }
+
+    public void addActorFoundationCard(MachineNode data, RootActor parent) {
+        ActorMachineCard card = createActorMachineCard(new ActorMachineCard.Parameter(context.skin, data,
+            context.assetManager.get(data.getAssetRecourcePath()),
+            context.assetManager.get("cards/empty_card.png"),
+            context.assetManager.get("machines/Grid_Overclocker_Upgrade.png"),
+            0.9f));
+        card.setParentActor(parent);
+        context.stage.addActor(card);
+
+        addDndIngredientDst(card);
+    }
+
+    private void addDndIngredientDst(ActorMachineCard card) {
+        for (MachineEdge machineEdge : card.edgeActorMap.keySet()) {
+            for (int i = 0; i < card.edgeActorMap.get(machineEdge).length; i++) {
+                Actor edgeArrowImage = card.edgeActorMap.get(machineEdge)[i];
+                if (edgeArrowImage == null) continue;
+                final boolean inputSlot = i % 2 == 0;
+                dndIngredient.addTarget(new DragAndDrop.Target(edgeArrowImage) {
+                    @Override
+                    public boolean drag(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
+                        IngredientCard ingredientCard = (IngredientCard) payload.getObject();
+                        return machineEdge.isDropValide(ingredientCard, inputSlot);
+                    }
+
+                    @Override
+                    public void drop(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
+                        IngredientCard ingredientCard = (IngredientCard) payload.getObject();
+                        moveActorIngredientCard(ingredientCard, ingredientCard.edgeAttached, machineEdge, inputSlot);
+                        context.soundsManager.playIngredientDragDrop();
+                    }
+                });
+            }
+        }
+    }
+
+    private void addDndMachineDst(ActorMachineCard card) {
+        for (int i = 0; i < card.edgeDropActor.length; i++) {
+            Actor dropActor = card.edgeDropActor[i];
+            int finalI = i;
+            dndMachine.addTarget(new DragAndDrop.Target(dropActor) {
+                @Override
+                public boolean drag(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
+                    ActorMachineCard dst = (ActorMachineCard) source.getActor();
+                    if (!tableau.data.isDropValide(card.data, finalI, dst.data)) {
+                        return false;
+                    }
+                    card.setColor(0.62f,0.95f,1f, 1f);
+                    return true;
+                }
+
+                @Override
+                public void reset(DragAndDrop.Source source, DragAndDrop.Payload payload) {
+                    card.setColor(Color.WHITE);
+                }
+
+                @Override
+                public void drop(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
+                    ActorMachineCard dst = (ActorMachineCard) source.getActor();
+                    dst.setParentActor(card, card.data.edges[finalI], dropActor);
+                    updateGridActorMachineCardPos();
+                    context.soundsManager.playCardDragDrop();
+                }
+            });
+        }
+    }
+
+    private void addDndMachineSrc(ActorMachineCard card) {
         dndMachine.addSource(new DragAndDrop.Source(card) {
             private final Vector2 originalPos = new Vector2();
             private final Vector2 deltaPos = new Vector2();
@@ -133,7 +225,7 @@ public final class ContextWrk implements ContextUi {
                 super.dragStop(event, x, y, pointer, payload, target);
                 if (target == null) {
                     dndMachine.getDragActor().setPosition(originalPos.x, originalPos.y);
-                    updateActorMachineCardPos();
+                    updateGridActorMachineCardPos();
                 }
             }
 
@@ -150,56 +242,6 @@ public final class ContextWrk implements ContextUi {
                 deltaPos.set(card.getX(), card.getY());
             }
         });
-
-        for (int i = 0; i < card.edgeDropActor.length; i++) {
-            Actor dropActor = card.edgeDropActor[i];
-            int finalI = i;
-            dndMachine.addTarget(new DragAndDrop.Target(dropActor) {
-                @Override
-                public boolean drag(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
-                    ActorMachineCard dst = (ActorMachineCard) source.getActor();
-                    if (!tableau.data.isDropValide(card.data, finalI, dst.data)) {
-                        return false;
-                    }
-                    card.setColor(0.62f,0.95f,1f, 1f);
-                    return true;
-                }
-
-                @Override
-                public void reset(DragAndDrop.Source source, DragAndDrop.Payload payload) {
-                    card.setColor(Color.WHITE);
-                }
-
-                @Override
-                public void drop(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
-                    ActorMachineCard dst = (ActorMachineCard) source.getActor();
-                    dst.setParentActor(card, card.data.edges[finalI], dropActor);
-                    updateActorMachineCardPos();
-                    context.soundsManager.playCardDragDrop();
-                }
-            });
-        }
-        for (MachineEdge machineEdge : card.edgeActorMap.keySet()) {
-            for (int i = 0; i < card.edgeActorMap.get(machineEdge).length; i++) {
-                Actor edgeArrowImage = card.edgeActorMap.get(machineEdge)[i];
-                if (edgeArrowImage == null) continue;
-                final boolean inputSlot = i % 2 == 0;
-                dndIngredient.addTarget(new DragAndDrop.Target(edgeArrowImage) {
-                    @Override
-                    public boolean drag(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
-                        IngredientCard ingredientCard = (IngredientCard) payload.getObject();
-                        return machineEdge.isDropValide(ingredientCard, inputSlot);
-                    }
-
-                    @Override
-                    public void drop(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
-                        IngredientCard ingredientCard = (IngredientCard) payload.getObject();
-                        moveActorIngredientCard(ingredientCard, ingredientCard.edgeAttached, machineEdge, inputSlot);
-                        context.soundsManager.playIngredientDragDrop();
-                    }
-                });
-            }
-        }
     }
 
     @Override
@@ -300,7 +342,7 @@ public final class ContextWrk implements ContextUi {
         actorMachineNode.ingredientActorCards.clear();
     }
 
-    private void updateActorMachineCardPos() {
+    private void updateGridActorMachineCardPos() {
         Queue<ActorMachineCard> actors = new LinkedList<>();
         for (RootActor rootActor : tableau.rootActors) {
             actors.addAll(rootActor.getCardChildren());
@@ -322,15 +364,35 @@ public final class ContextWrk implements ContextUi {
         }
     }
 
+    private void updateFoundationNode() {
+        for (RootActor rootActor : foundation.rootActors) {
+            for (ActorMachineCard cardChild : rootActor.getCardChildren()) {
+                cardChild.updateCardPos();
+            }
+        }
+    }
+
     private void process() {
         tableau.data.process(this);
         context.soundsManager.playProcess();
     }
 
+    private RootActor[] concatTableauFoundationRoot() {
+        RootActor[] concat  = new RootActor[tableau.rootActors.length + foundation.rootActors.length];
+        int i = 0;
+        for (RootActor rootActor : tableau.rootActors) {
+            concat[i++] = rootActor;
+        }
+        for (RootActor rootActor : foundation.rootActors) {
+            concat[i++] = rootActor;
+        }
+        return concat;
+    }
+
     private Set<ActorMachineCard> getAllActorMachineNode() {
         Set<ActorMachineCard> machines = new HashSet<>();
         Queue<ActorMachineCard> actorMachineCardsQueue = new LinkedList<>();
-        for (RootActor rootActor : tableau.rootActors) {
+        for (RootActor rootActor : concatTableauFoundationRoot()) {
             actorMachineCardsQueue.addAll(rootActor.getCardChildren());
             while (!actorMachineCardsQueue.isEmpty()) {
                 ActorMachineCard actorMachineCard = actorMachineCardsQueue.poll();
@@ -343,7 +405,7 @@ public final class ContextWrk implements ContextUi {
 
     private ActorMachineCard findActorMachineNode(MachineNode node) {
         Queue<ActorMachineCard> actorMachineCardsQueue = new LinkedList<>();
-        for (RootActor rootActor : tableau.rootActors) {
+        for (RootActor rootActor : concatTableauFoundationRoot()) {
             actorMachineCardsQueue.addAll(rootActor.getCardChildren());
             while (!actorMachineCardsQueue.isEmpty()) {
                 ActorMachineCard actorMachineCard = actorMachineCardsQueue.poll();

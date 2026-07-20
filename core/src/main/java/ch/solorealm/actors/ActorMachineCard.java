@@ -30,34 +30,34 @@ public class ActorMachineCard extends Table implements GetCardChildren {
     private Actor edgeParentActor;
     private static final float SCALE_FACTOR = 1.5f;
 
-    public ActorMachineCard(Skin skin, MachineNode data, Texture iconTexture, Texture backgroundTexture, Texture arrowTexture) {
-        this.data = data;
-        this.icon = new Image(iconTexture);
+    public ActorMachineCard(Parameter parameter) {
+        this.data = parameter.data;
+        this.icon = new Image(parameter.iconTexture);
         this.cardActorChild = new ArrayList<>();
         this.ingredientActorCards = new HashSet<>();
         this.edgeActorMap = new HashMap<>();
 
-        float edgeWidth = backgroundTexture.getWidth() * SCALE_FACTOR;
-        float edgeHeight = backgroundTexture.getHeight() * SCALE_FACTOR;
-        float totalWidth = edgeWidth * data.edges.length + (32 * (data.edges.length - 1));
+        float edgeWidth = parameter.backgroundTexture.getWidth() * SCALE_FACTOR;
+        float edgeHeight = parameter.backgroundTexture.getHeight() * SCALE_FACTOR;
+        float totalWidth = edgeWidth * parameter.data.edges.length + (32 * (parameter.data.edges.length - 1));
         this.setSize(totalWidth, edgeHeight);
 
-        NinePatchDrawable background = new NinePatchDrawable(new NinePatch(backgroundTexture));
+        NinePatchDrawable background = new NinePatchDrawable(new NinePatch(parameter.backgroundTexture));
         this.background(background);
 
         Table edgesRowTable = new Table();
 
-        for (int i = 0; i < data.edges.length; i++) {
-            MachineEdge edge = data.edges[i];
+        for (int i = 0; i < parameter.data.edges.length; i++) {
+            MachineEdge edge = parameter.data.edges[i];
             edgeTable = new Table();
 
-            float arrowW = arrowTexture.getWidth() * SCALE_FACTOR;
-            float arrowH = arrowTexture.getHeight() * SCALE_FACTOR;
+            float arrowW = parameter.arrowTexture.getWidth() * SCALE_FACTOR;
+            float arrowH = parameter.arrowTexture.getHeight() * SCALE_FACTOR;
 
             Image inputArrowImage = null;
             Image outputArrowImage = null;
             if (edge.inputType != null) {
-                inputArrowImage = new Image(arrowTexture);
+                inputArrowImage = new Image(parameter.arrowTexture);
                 inputArrowImage.setOrigin(arrowW / 2f, arrowH / 2f);
                 inputArrowImage.rotateBy(180);
                 inputArrowImage.setAlign(Align.center);
@@ -67,7 +67,7 @@ public class ActorMachineCard extends Table implements GetCardChildren {
             }
 
             if (edge.outputType != null) {
-                outputArrowImage = new Image(arrowTexture);
+                outputArrowImage = new Image(parameter.arrowTexture);
                 edgeTable.add(outputArrowImage).size(arrowW, arrowH);
             } else {
                 edgeTable.add().size(arrowW, arrowH);
@@ -77,7 +77,7 @@ public class ActorMachineCard extends Table implements GetCardChildren {
 
             edgesRowTable.add(edgeTable).width(edgeWidth).center();
 
-            if (i < data.edges.length - 1) {
+            if (i < parameter.data.edges.length - 1) {
                 edgesRowTable.add().width(32);
             }
         }
@@ -85,9 +85,12 @@ public class ActorMachineCard extends Table implements GetCardChildren {
         Table contentTable = new Table();
         contentTable.add(edgesRowTable).expandX().fillX().row();
 
-        Label machineNameLabel = new Label(data.getMachineDisplayName(), skin, "window");
+        Label machineNameLabel = new Label(parameter.data.getMachineDisplayName(), parameter.skin, "window");
         machineNameLabel.setColor(Color.BLACK);
         machineNameLabel.setFontScale(SCALE_FACTOR);
+        if (parameter.fontScale != 0) {
+            machineNameLabel.setFontScale(parameter.fontScale);
+        }
 
         contentTable.add(machineNameLabel).center().pad(5 * SCALE_FACTOR).row();
         contentTable.add(icon).size(64 * SCALE_FACTOR, 64 * SCALE_FACTOR).expandY().row();
@@ -95,8 +98,8 @@ public class ActorMachineCard extends Table implements GetCardChildren {
 
         setTouchable(Touchable.enabled);
 
-        edgeDropActor = new Actor[data.edges.length];
-        for (int i = 0; i < data.edges.length; i++) {
+        edgeDropActor = new Actor[parameter.data.edges.length];
+        for (int i = 0; i < parameter.data.edges.length; i++) {
             Actor dropEdgeActor = new Actor();
             dropEdgeActor.setSize(edgeWidth, 120);
             dropEdgeActor.setPosition((edgeWidth * i) + 32 * i, 0);
@@ -187,6 +190,30 @@ public class ActorMachineCard extends Table implements GetCardChildren {
             return actorActorEntry[0];
         } else {
             return actorActorEntry[1];
+        }
+    }
+
+    public static final class Parameter {
+        public final Skin skin;
+        public final MachineNode data;
+        public final Texture iconTexture;
+        public final Texture backgroundTexture;
+        public final Texture arrowTexture;
+        public float fontScale;
+
+        public Parameter(Skin skin, MachineNode data, Texture iconTexture, Texture backgroundTexture,
+                         Texture arrowTexture) {
+            this.skin = skin;
+            this.data = data;
+            this.iconTexture = iconTexture;
+            this.backgroundTexture = backgroundTexture;
+            this.arrowTexture = arrowTexture;
+        }
+
+        public Parameter(Skin skin, MachineNode data, Texture iconTexture, Texture backgroundTexture,
+                         Texture arrowTexture, float fontScale) {
+            this(skin, data, iconTexture, backgroundTexture, arrowTexture);
+            this.fontScale = fontScale;
         }
     }
 }

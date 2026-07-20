@@ -9,6 +9,6 @@ public class FurnaceMachine extends MachineNode {
 
     @Override
     public String getMachineDisplayName() {
-        return "furnace";
+        return "Furnace";
     }
 }
