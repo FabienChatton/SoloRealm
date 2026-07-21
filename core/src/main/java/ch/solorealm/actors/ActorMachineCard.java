@@ -28,6 +28,7 @@ public class ActorMachineCard extends Table implements GetCardChildren {
     private Table edgeTable;
     private GetCardChildren cardActorParent;
     private Actor edgeParentActor;
+    public boolean dndIngredientDst;
     private static final float SCALE_FACTOR = 1.5f;
 
     public ActorMachineCard(Parameter parameter) {

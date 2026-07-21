@@ -24,6 +24,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 
 public final class ContextWrk implements ContextUi {
     private final Context context;
@@ -31,6 +33,9 @@ public final class ContextWrk implements ContextUi {
     private final DragAndDrop dndIngredient;
     private RootGridActor tableau;
     private RootGridActor foundation;
+    private RootGridActor shop1;
+    private RootGridActor shop2;
+    private final Set<RootGridActor> rootGridActors;
 
     public ContextWrk(Context context) {
         this.context = context;
@@ -39,10 +44,12 @@ public final class ContextWrk implements ContextUi {
         dndIngredient = new DragAndDrop();
         dndIngredient.setDragTime(0);
         dndIngredient.setKeepWithinStage(false);
+        rootGridActors = new HashSet<>();
     }
 
     public void createGrid() {
         tableau = new RootGridActor(new RootGrid(6), context.skin, context.assetManager.get("cards/empty_root.png"));
+        rootGridActors.add(tableau);
         for (int i = 0; i < tableau.rootActors.length; i++) {
             RootActor rootActor = tableau.rootActors[i];
             int finalI = i;
@@ -66,7 +73,7 @@ public final class ContextWrk implements ContextUi {
                 public void drop(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
                     ActorMachineCard machineCard = (ActorMachineCard) source.getActor();
                     machineCard.setParentActor(rootActor);
-                    updateGridActorMachineCardPos();
+                    updateAllGrid();
                     context.soundsManager.playCardDragDrop();
                 }
             });
@@ -91,12 +98,19 @@ public final class ContextWrk implements ContextUi {
         context.stage.addActor(processButton);
 
         foundation = new RootGridActor(new RootGrid(3), context.skin, context.assetManager.get("cards/empty_root.png"));
+        rootGridActors.add(foundation);
         foundation.setPosition(1230, 700);
         foundation.validate();
         context.stage.addActor(foundation);
 
         addActorFoundationCard(new FoundationNode(IngredientType.INGOT, IngredientMaterial.COPPER), foundation.rootActors[0]);
-        updateFoundationNode();
+
+        shop1 = new RootGridActor(new RootGrid(3), context.skin, context.assetManager.get("cards/empty_root.png"));
+        rootGridActors.add(shop1);
+        shop1.setPosition(1230, 500);
+        shop1.validate();
+        context.stage.addActor(shop1);
+        addActorShopCard(FurnaceMachine::new, shop1.rootActors[0]);
 
         Image bgImage = new Image(context.assetManager.get("bg/bg.jpg", Texture.class));
         bgImage.setSize(1488, 837);
@@ -110,7 +124,7 @@ public final class ContextWrk implements ContextUi {
         addActorMachineCard(new AssemblingMachine(), tableau.rootActors[3]);
         addActorMachineCard(new MiningMachine(IngredientMaterial.COPPER), tableau.rootActors[5]);
 
-        updateGridActorMachineCardPos();
+        updateAllGrid();
     }
 
     public ActorMachineCard createActorMachineCard(ActorMachineCard.Parameter parameter) {
@@ -142,7 +156,26 @@ public final class ContextWrk implements ContextUi {
         addDndIngredientDst(card);
     }
 
+    public void addActorShopCard(Supplier<MachineNode> machineNodeConstructor, RootActor parent) {
+        MachineNode originalData = machineNodeConstructor.get();
+
+        ActorMachineCard card = createActorMachineCard(new ActorMachineCard.Parameter(context.skin, originalData,
+            context.assetManager.get(originalData.getAssetRecourcePath()),
+            context.assetManager.get("cards/empty_card.png"),
+            context.assetManager.get("machines/Grid_Overclocker_Upgrade.png")));
+        card.setParentActor(parent);
+        context.stage.addActor(card);
+
+        addDndMachineSrc(card, onlyWhenEnterTableau(card.data, () -> {
+            addDndMachineDst(card);
+            addDndIngredientDst(card);
+            addActorShopCard(machineNodeConstructor, parent);
+            updateAllGrid();
+        }));
+    }
+
     private void addDndIngredientDst(ActorMachineCard card) {
+        card.dndIngredientDst = true;
         for (MachineEdge machineEdge : card.edgeActorMap.keySet()) {
             for (int i = 0; i < card.edgeActorMap.get(machineEdge).length; i++) {
                 Actor edgeArrowImage = card.edgeActorMap.get(machineEdge)[i];
@@ -190,14 +223,17 @@ public final class ContextWrk implements ContextUi {
                 public void drop(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
                     ActorMachineCard dst = (ActorMachineCard) source.getActor();
                     dst.setParentActor(card, card.data.edges[finalI], dropActor);
-                    updateGridActorMachineCardPos();
+                    updateAllGrid();
                     context.soundsManager.playCardDragDrop();
                 }
             });
         }
     }
-
     private void addDndMachineSrc(ActorMachineCard card) {
+        addDndMachineSrc(card, null);
+    }
+
+    private void addDndMachineSrc(ActorMachineCard card, Runnable drop) {
         dndMachine.addSource(new DragAndDrop.Source(card) {
             private final Vector2 originalPos = new Vector2();
             private final Vector2 deltaPos = new Vector2();
@@ -225,7 +261,11 @@ public final class ContextWrk implements ContextUi {
                 super.dragStop(event, x, y, pointer, payload, target);
                 if (target == null) {
                     dndMachine.getDragActor().setPosition(originalPos.x, originalPos.y);
-                    updateGridActorMachineCardPos();
+                    updateAllGrid();
+                } else {
+                    if (drop != null) {
+                        drop.run();
+                    }
                 }
             }
 
@@ -246,8 +286,8 @@ public final class ContextWrk implements ContextUi {
 
     @Override
     public void moveActorIngredientCard(IngredientCard ingredientCard, MachineEdge srcEdge, MachineEdge dstEdge, boolean dstInputSlot) {
-        ActorMachineCard srcMachineCard = findActorMachineNode(ingredientCard.edgeAttached.getNode());
-        ActorMachineCard dstMachineCard = findActorMachineNode(dstEdge.getNode());
+        ActorMachineCard srcMachineCard = findActorMachineNodeAnyWhere(ingredientCard.edgeAttached.getNode());
+        ActorMachineCard dstMachineCard = findActorMachineNodeAnyWhere(dstEdge.getNode());
         Actor ingredientActorCard = null;
         for (Actor actor : srcMachineCard.ingredientActorCards) {
             IngredientCard card = (IngredientCard) actor.getUserObject();
@@ -278,7 +318,7 @@ public final class ContextWrk implements ContextUi {
 
     @Override
     public void addActorIngredientCard(IngredientCard ingredientCard, MachineEdge edge, boolean inputSlot) {
-        ActorMachineCard actorMachineNode = findActorMachineNode(edge.getNode());
+        ActorMachineCard actorMachineNode = findActorMachineNodeAnyWhere(edge.getNode());
         if (actorMachineNode == null) return;
         Image ingredientActor = new Image(context.assetManager.get(ingredientCard.getAssetRecourcePath(), Texture.class));
         ingredientActor.setUserObject(ingredientCard);
@@ -307,12 +347,14 @@ public final class ContextWrk implements ContextUi {
                 ingredientActor.toFront();
 
                 //valide drop color
-                for (ActorMachineCard actorMachineCard : getAllActorMachineNode()) {
-                    for (MachineEdge machineEdge : actorMachineCard.data.edges) {
-                        if (machineEdge.isDropValide(ingredientCard, true)) {
-                            Actor valideDropActor = actorMachineCard.edgeActorMap.get(machineEdge)[0];
-                            valideDropActor.setColor(0.62f,0.95f,1f, 1f);
-                            valideDropActors.add(valideDropActor);
+                for (ActorMachineCard actorMachineCard : getAllActorMachineNodeAnyWhere()) {
+                    if (actorMachineCard.dndIngredientDst) {
+                        for (MachineEdge machineEdge : actorMachineCard.data.edges) {
+                            if (machineEdge.isDropValide(ingredientCard, true)) {
+                                Actor valideDropActor = actorMachineCard.edgeActorMap.get(machineEdge)[0];
+                                valideDropActor.setColor(0.62f, 0.95f, 1f, 1f);
+                                valideDropActors.add(valideDropActor);
+                            }
                         }
                     }
                 }
@@ -335,41 +377,18 @@ public final class ContextWrk implements ContextUi {
 
     @Override
     public void clearActorIngredientCard(MachineNode machineNode) {
-        ActorMachineCard actorMachineNode = findActorMachineNode(machineNode);
+        ActorMachineCard actorMachineNode = findActorMachineNodeAnyWhere(machineNode);
         for (Actor ingredientActorCard : actorMachineNode.ingredientActorCards) {
             ingredientActorCard.remove();
         }
         actorMachineNode.ingredientActorCards.clear();
     }
 
-    private void updateGridActorMachineCardPos() {
-        Queue<ActorMachineCard> actors = new LinkedList<>();
-        for (RootActor rootActor : tableau.rootActors) {
-            actors.addAll(rootActor.getCardChildren());
-        }
-        while (!actors.isEmpty()) {
-            ActorMachineCard actorMachineCard = actors.poll();
-            actorMachineCard.updateCardPos();
-            actorMachineCard.toFront();
-            actorMachineCard.updateIngredientActors();
-            for (MachineEdge edge : actorMachineCard.data.edges) {
-                MachineNode node = edge.getChildNode();
-                if (node != null) {
-                    ActorMachineCard actorMachineNode = findActorMachineNode(node);
-                    if (actorMachineNode != null) {
-                        actors.add(actorMachineNode);
-                    }
-                }
-            }
-        }
-    }
-
-    private void updateFoundationNode() {
-        for (RootActor rootActor : foundation.rootActors) {
-            for (ActorMachineCard cardChild : rootActor.getCardChildren()) {
-                cardChild.updateCardPos();
-            }
-        }
+    private void updateAllGrid() {
+        tableau.updateActorDeep();
+        foundation.updateActorSimple();
+        shop1.updateActorSimple();
+        // shop2.updateActorSimple();
     }
 
     private void process() {
@@ -389,10 +408,11 @@ public final class ContextWrk implements ContextUi {
         return concat;
     }
 
-    private Set<ActorMachineCard> getAllActorMachineNode() {
+    private Set<ActorMachineCard> getAllActorMachineNodeAnyWhere() {
         Set<ActorMachineCard> machines = new HashSet<>();
         Queue<ActorMachineCard> actorMachineCardsQueue = new LinkedList<>();
-        for (RootActor rootActor : concatTableauFoundationRoot()) {
+        for (RootActor rootActor : rootGridActors.stream()
+                .flatMap(rootGridActor -> Arrays.stream(rootGridActor.rootActors)).toList()) {
             actorMachineCardsQueue.addAll(rootActor.getCardChildren());
             while (!actorMachineCardsQueue.isEmpty()) {
                 ActorMachineCard actorMachineCard = actorMachineCardsQueue.poll();
@@ -403,18 +423,27 @@ public final class ContextWrk implements ContextUi {
         return machines;
     }
 
-    private ActorMachineCard findActorMachineNode(MachineNode node) {
-        Queue<ActorMachineCard> actorMachineCardsQueue = new LinkedList<>();
-        for (RootActor rootActor : concatTableauFoundationRoot()) {
-            actorMachineCardsQueue.addAll(rootActor.getCardChildren());
-            while (!actorMachineCardsQueue.isEmpty()) {
-                ActorMachineCard actorMachineCard = actorMachineCardsQueue.poll();
-                if (actorMachineCard.data == node) {
-                    return actorMachineCard;
-                }
-                actorMachineCardsQueue.addAll(actorMachineCard.getCardChildren());
+    private ActorMachineCard findActorMachineNodeAnyWhere(MachineNode node) {
+        ActorMachineCard find = null;
+        for (RootGridActor rootGridActor : rootGridActors) {
+            find = rootGridActor.findActorMachineNode(node);
+            if (find != null) {
+                break;
             }
         }
-        return null;
+        return find;
+    }
+
+    private Runnable onlyWhenEnterTableau(MachineNode node, Runnable run) {
+        boolean initialEnter = tableau.findActorMachineNode(node) != null;
+        AtomicBoolean wasInTableau = new AtomicBoolean(initialEnter);
+
+        return () -> {
+            boolean isInTableau = tableau.findActorMachineNode(node) != null;
+            if (!wasInTableau.get() && isInTableau) {
+                run.run();
+                wasInTableau.set(true);
+            }
+        };
     }
 }

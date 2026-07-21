@@ -4,7 +4,6 @@ import ch.solorealm.beans.machine.RootMachine;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
@@ -17,7 +16,7 @@ public class RootActor extends Table implements GetCardChildren {
     public final Image backgroundImage;
     private final List<ActorMachineCard> cardChildren;
 
-    public RootActor(Skin skin, RootMachine data, Texture backgroundTexture) {
+    public RootActor(RootMachine data, Texture backgroundTexture) {
         this.data = data;
         this.backgroundImage = new Image(backgroundTexture);
         this.cardChildren = new ArrayList<>();
