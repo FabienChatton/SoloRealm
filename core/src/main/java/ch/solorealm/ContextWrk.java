@@ -84,8 +84,8 @@ public final class ContextWrk implements ContextUi {
         context.stage.addActor(tableau);
 
         TextButton processButton = new TextButton("Process", context.skin);
-        processButton.setPosition(1000, 50);
-        processButton.setWidth(440);
+        processButton.setPosition(1022, 50);
+        processButton.setWidth(416);
         processButton.setHeight(100);
         processButton.getLabel().setFontScale(3);
         processButton.addListener(new ClickListener() {
@@ -107,10 +107,18 @@ public final class ContextWrk implements ContextUi {
 
         shop1 = new RootGridActor(new RootGrid(3), context.skin, context.assetManager.get("cards/empty_root.png"));
         rootGridActors.add(shop1);
-        shop1.setPosition(1230, 500);
+        shop1.setPosition(1230, 450);
         shop1.validate();
         context.stage.addActor(shop1);
         addActorShopCard(FurnaceMachine::new, shop1.rootActors[0]);
+
+
+        shop2 = new RootGridActor(new RootGrid(3), context.skin, context.assetManager.get("cards/empty_root.png"));
+        rootGridActors.add(shop2);
+        shop2.setPosition(1230, 250);
+        shop2.validate();
+        context.stage.addActor(shop2);
+        addActorShopCard(AssemblingMachine::new, shop2.rootActors[0]);
 
         Image bgImage = new Image(context.assetManager.get("bg/bg.jpg", Texture.class));
         bgImage.setSize(1488, 837);
@@ -388,7 +396,7 @@ public final class ContextWrk implements ContextUi {
         tableau.updateActorDeep();
         foundation.updateActorSimple();
         shop1.updateActorSimple();
-        // shop2.updateActorSimple();
+        shop2.updateActorSimple();
     }
 
     private void process() {
