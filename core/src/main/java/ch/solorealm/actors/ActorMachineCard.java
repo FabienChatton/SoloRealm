@@ -194,6 +194,20 @@ public class ActorMachineCard extends Table implements GetCardChildren {
         }
     }
 
+    @Override
+    public void setColor(Color color) {
+        super.setColor(color);
+        for (Actor[] value : edgeActorMap.values()) {
+            if (value[0] != null) {
+                value[0].setColor(color);
+            }
+            if (value[1] != null) {
+                value[1].setColor(color);
+            }
+            icon.setColor(color);
+        }
+    }
+
     public static final class Parameter {
         public final Skin skin;
         public final MachineNode data;

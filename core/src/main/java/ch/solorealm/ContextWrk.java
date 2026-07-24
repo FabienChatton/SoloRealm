@@ -97,20 +97,13 @@ public final class ContextWrk implements ContextUi {
         });
         context.stage.addActor(processButton);
 
-        foundation = new RootGridActor(new RootGrid(3), context.skin, context.assetManager.get("cards/empty_root.png"));
-        rootGridActors.add(foundation);
-        foundation.setPosition(1230, 700);
-        foundation.validate();
-        context.stage.addActor(foundation);
-
-        addActorFoundationCard(new FoundationNode(IngredientType.INGOT, IngredientMaterial.COPPER), foundation.rootActors[0]);
-
         shop1 = new RootGridActor(new RootGrid(3), context.skin, context.assetManager.get("cards/empty_root.png"));
         rootGridActors.add(shop1);
         shop1.setPosition(1230, 450);
         shop1.validate();
         context.stage.addActor(shop1);
         addActorShopCard(FurnaceMachine::new, shop1.rootActors[0]);
+        disableSimpleGrid(shop1);
 
 
         shop2 = new RootGridActor(new RootGrid(3), context.skin, context.assetManager.get("cards/empty_root.png"));
@@ -119,6 +112,14 @@ public final class ContextWrk implements ContextUi {
         shop2.validate();
         context.stage.addActor(shop2);
         addActorShopCard(AssemblingMachine::new, shop2.rootActors[0]);
+        disableSimpleGrid(shop2);
+
+        foundation = new RootGridActor(new RootGrid(3), context.skin, context.assetManager.get("cards/empty_root.png"));
+        rootGridActors.add(foundation);
+        foundation.setPosition(1230, 700);
+        foundation.validate();
+        context.stage.addActor(foundation);
+        addActorFoundationCard(new FoundationNode(IngredientType.INGOT, IngredientMaterial.COPPER), foundation, 0, shop1);
 
         Image bgImage = new Image(context.assetManager.get("bg/bg.jpg", Texture.class));
         bgImage.setSize(1488, 837);
@@ -152,7 +153,8 @@ public final class ContextWrk implements ContextUi {
         addDndIngredientDst(card);
     }
 
-    public void addActorFoundationCard(MachineNode data, RootActor parent) {
+    public void addActorFoundationCard(MachineNode data, RootGridActor foundation, int index, RootGridActor linkedShop) {
+        RootActor parent = foundation.rootActors[index];
         ActorMachineCard card = createActorMachineCard(new ActorMachineCard.Parameter(context.skin, data,
             context.assetManager.get(data.getAssetRecourcePath()),
             context.assetManager.get("cards/empty_card.png"),
@@ -161,7 +163,12 @@ public final class ContextWrk implements ContextUi {
         card.setParentActor(parent);
         context.stage.addActor(card);
 
-        addDndIngredientDst(card);
+        Runnable onValidatedFoundation = () -> {
+            enableSimpleGrid(linkedShop);
+            disableCard(card);
+            context.soundsManager.playValidatedFoundation();
+        };
+        addDndIngredientDst(card, onValidatedFoundation);
     }
 
     public void addActorShopCard(Supplier<MachineNode> machineNodeConstructor, RootActor parent) {
@@ -182,7 +189,7 @@ public final class ContextWrk implements ContextUi {
         }));
     }
 
-    private void addDndIngredientDst(ActorMachineCard card) {
+    private void addDndIngredientDst(ActorMachineCard card, Runnable drop) {
         card.dndIngredientDst = true;
         for (MachineEdge machineEdge : card.edgeActorMap.keySet()) {
             for (int i = 0; i < card.edgeActorMap.get(machineEdge).length; i++) {
@@ -201,10 +208,17 @@ public final class ContextWrk implements ContextUi {
                         IngredientCard ingredientCard = (IngredientCard) payload.getObject();
                         moveActorIngredientCard(ingredientCard, ingredientCard.edgeAttached, machineEdge, inputSlot);
                         context.soundsManager.playIngredientDragDrop();
+                        if (drop != null) {
+                            drop.run();
+                        }
                     }
                 });
             }
         }
+    }
+
+    private void addDndIngredientDst(ActorMachineCard card) {
+        addDndIngredientDst(card, null);
     }
 
     private void addDndMachineDst(ActorMachineCard card) {
@@ -453,5 +467,31 @@ public final class ContextWrk implements ContextUi {
                 wasInTableau.set(true);
             }
         };
+    }
+
+    private void disableSimpleGrid(RootGridActor gridActor) {
+        for (RootActor rootActor : gridActor.rootActors) {
+            for (ActorMachineCard cardChild : rootActor.getCardChildren()) {
+                disableCard(cardChild);
+            }
+        }
+    }
+
+    private void disableCard(ActorMachineCard card) {
+        card.setTouchable(Touchable.disabled);
+        card.setColor(Color.LIGHT_GRAY);
+        for (Actor ingredientActorCard : card.ingredientActorCards) {
+            ingredientActorCard.setTouchable(Touchable.disabled);
+            ingredientActorCard.setColor(Color.LIGHT_GRAY);
+        }
+    }
+
+    private void enableSimpleGrid(RootGridActor gridActor) {
+        for (RootActor rootActor : gridActor.rootActors) {
+            for (ActorMachineCard cardChild : rootActor.getCardChildren()) {
+                cardChild.setTouchable(Touchable.enabled);
+                cardChild.setColor(Color.WHITE);
+            }
+        }
     }
 }

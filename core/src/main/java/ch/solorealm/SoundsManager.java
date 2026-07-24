@@ -33,4 +33,9 @@ public class SoundsManager {
         Sound sound = context.assetManager.get("sounds/stone2.mp3", Sound.class);
         sound.play();
     }
+
+    public void playValidatedFoundation() {
+        Sound sound = context.assetManager.get("sounds/exp-multi.mp3", Sound.class);
+        sound.play();
+    }
 }
