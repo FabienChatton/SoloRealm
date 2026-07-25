@@ -136,15 +136,11 @@ public final class ContextWrk implements ContextUi {
         updateAllGrid();
     }
 
-    public ActorMachineCard createActorMachineCard(ActorMachineCard.Parameter parameter) {
-        return new ActorMachineCard(parameter);
-    }
-
     public void addActorMachineCard(MachineNode data, RootActor parent) {
-        ActorMachineCard card = createActorMachineCard(new ActorMachineCard.Parameter(context.skin, data,
+        ActorMachineCard card = new ActorMachineCard(context.skin, data,
             context.assetManager.get(data.getAssetRecourcePath()),
             context.assetManager.get("cards/empty_card.png"),
-            context.assetManager.get("machines/Grid_Overclocker_Upgrade.png")));
+            context.assetManager.get("machines/Grid_Overclocker_Upgrade.png"));
         card.setParentActor(parent);
         context.stage.addActor(card);
 
@@ -155,11 +151,10 @@ public final class ContextWrk implements ContextUi {
 
     public void addActorFoundationCard(MachineNode data, RootGridActor foundation, int index, RootGridActor linkedShop) {
         RootActor parent = foundation.rootActors[index];
-        ActorMachineCard card = createActorMachineCard(new ActorMachineCard.Parameter(context.skin, data,
+        ActorMachineCard card = new ActorMachineCard(context.skin, data,
             context.assetManager.get(data.getAssetRecourcePath()),
             context.assetManager.get("cards/empty_card.png"),
-            context.assetManager.get("machines/Grid_Overclocker_Upgrade.png"),
-            0.9f));
+            context.assetManager.get("machines/Grid_Overclocker_Upgrade.png"));
         card.setParentActor(parent);
         context.stage.addActor(card);
 
@@ -174,10 +169,10 @@ public final class ContextWrk implements ContextUi {
     public void addActorShopCard(Supplier<MachineNode> machineNodeConstructor, RootActor parent) {
         MachineNode originalData = machineNodeConstructor.get();
 
-        ActorMachineCard card = createActorMachineCard(new ActorMachineCard.Parameter(context.skin, originalData,
+        ActorMachineCard card = new ActorMachineCard(context.skin, originalData,
             context.assetManager.get(originalData.getAssetRecourcePath()),
             context.assetManager.get("cards/empty_card.png"),
-            context.assetManager.get("machines/Grid_Overclocker_Upgrade.png")));
+            context.assetManager.get("machines/Grid_Overclocker_Upgrade.png"));
         card.setParentActor(parent);
         context.stage.addActor(card);
 
