@@ -102,7 +102,7 @@ public final class ContextWrk implements ContextUi {
         shop1.setPosition(1230, 450);
         shop1.validate();
         context.stage.addActor(shop1);
-        addActorShopCard(FurnaceMachine::new, shop1.rootActors[0]);
+        addActorShopCard(AlloySmelter::new, shop1.rootActors[0]);
         disableSimpleGrid(shop1);
 
 

@@ -3,6 +3,7 @@ package ch.solorealm.beans.machine;
 import ch.solorealm.beans.ingredient.IngredientCard;
 import ch.solorealm.beans.ingredient.IngredientMaterial;
 import ch.solorealm.beans.ingredient.IngredientType;
+import ch.solorealm.beans.ingredient.IngredientTypeMaterialPair;
 
 public class MachineEdge {
     private MachineNode node;
@@ -41,9 +42,17 @@ public class MachineEdge {
     }
 
     public boolean isDropValide(IngredientCard ingredientCard, boolean inputSlot) {
-        if (inputSlot) {
-            return ingredientCard.ingredientType == inputType && this.input == null;
+        if (!inputSlot) return false;
+        if (input != null) return false;
+        if (inputType != IngredientType._COMPLEX) {
+            return ingredientCard.ingredientType == inputType;
         } else {
+            for (IngredientTypeMaterialPair ingredientTypeMaterialPair : node.specialRecipe.input()) {
+                if (ingredientCard.ingredientMaterial == ingredientTypeMaterialPair.material() &&
+                    ingredientCard.ingredientType == ingredientTypeMaterialPair.type()) {
+                    return true;
+                }
+            }
             return false;
         }
     }
