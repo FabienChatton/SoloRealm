@@ -9,8 +9,8 @@ public class AlloySmelter extends MachineNode {
 
     public AlloySmelter() {
         super(new IngredientSpecialRecipe(
-            new IngredientTypeMaterialPair(IngredientType.INGOT, IngredientMaterial.IRON),
-            new IngredientTypeMaterialPair(IngredientType.INGOT, IngredientMaterial.COPPER),
+            new IngredientTypeMaterialPair(IngredientType.INGOT, IngredientMaterial.BRONZE),
+            new IngredientTypeMaterialPair(IngredientType.INGOT, IngredientMaterial.TIN),
             new IngredientTypeMaterialPair(IngredientType.INGOT, IngredientMaterial.COPPER)
         ));
     }
