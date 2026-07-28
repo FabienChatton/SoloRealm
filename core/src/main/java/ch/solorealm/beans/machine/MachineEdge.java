@@ -47,13 +47,29 @@ public class MachineEdge {
         if (inputType != IngredientType._COMPLEX) {
             return ingredientCard.ingredientType == inputType;
         } else {
-            for (IngredientTypeMaterialPair ingredientTypeMaterialPair : node.specialRecipe.input()) {
+            int require = 0;
+            int already = 0;
+            IngredientTypeMaterialPair[] inputRecipe = node.specialRecipe.input();
+            for (IngredientTypeMaterialPair ingredientTypeMaterialPair : inputRecipe) {
                 if (ingredientCard.ingredientMaterial == ingredientTypeMaterialPair.material() &&
                     ingredientCard.ingredientType == ingredientTypeMaterialPair.type()) {
-                    return true;
+                    require++;
                 }
             }
-            return false;
+            if (require == 0) {
+                return false;
+            }
+            for (MachineEdge edge : node.edges) {
+                if (edge.input == null) continue;
+                if (ingredientCard.ingredientMaterial == edge.input.ingredientMaterial &&
+                    ingredientCard.ingredientType == edge.input.ingredientType) {
+                    already++;
+                    if (already == require) {
+                        return false;
+                    }
+                }
+            }
+            return true;
         }
     }
 
