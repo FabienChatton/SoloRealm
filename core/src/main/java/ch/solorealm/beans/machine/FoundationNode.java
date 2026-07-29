@@ -1,5 +1,6 @@
 package ch.solorealm.beans.machine;
 
+import ch.solorealm.ContextWrk;
 import ch.solorealm.beans.ingredient.IngredientMaterial;
 import ch.solorealm.beans.ingredient.IngredientType;
 
@@ -20,6 +21,8 @@ public class FoundationNode extends MachineNode {
 
     @Override
     public String getMachineDisplayName() {
-        return String.format("%s %s", ingredientMaterial, ingredientType).toLowerCase();
+        return String.format("%s %s",
+            ContextWrk.upperFirstLetter(ingredientMaterial.toString()),
+            ContextWrk.upperFirstLetter(ingredientType.toString()));
     }
 }

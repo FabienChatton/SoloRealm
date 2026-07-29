@@ -102,8 +102,6 @@ public final class ContextWrk implements ContextUi {
         shop1.setPosition(1230, 450);
         shop1.validate();
         context.stage.addActor(shop1);
-        addActorShopCard(AlloySmelter::new, shop1.rootActors[0]);
-        disableSimpleGrid(shop1);
 
 
         shop2 = new RootGridActor(new RootGrid(3), context.skin, context.assetManager.get("cards/empty_root.png"));
@@ -111,15 +109,12 @@ public final class ContextWrk implements ContextUi {
         shop2.setPosition(1230, 250);
         shop2.validate();
         context.stage.addActor(shop2);
-        addActorShopCard(AssemblingMachine::new, shop2.rootActors[0]);
-        disableSimpleGrid(shop2);
 
         foundation = new RootGridActor(new RootGrid(3), context.skin, context.assetManager.get("cards/empty_root.png"));
         rootGridActors.add(foundation);
         foundation.setPosition(1230, 700);
         foundation.validate();
         context.stage.addActor(foundation);
-        addActorFoundationCard(new FoundationNode(IngredientType.INGOT, IngredientMaterial.COPPER), foundation, 0, shop1);
 
         Image bgImage = new Image(context.assetManager.get("bg/bg.jpg", Texture.class));
         bgImage.setSize(1488, 837);
@@ -128,11 +123,17 @@ public final class ContextWrk implements ContextUi {
 
 
         // test
-        addActorMachineCard(new AssemblingMachine(), tableau.rootActors[0]);
-        addActorMachineCard(new FurnaceMachine(), tableau.rootActors[2]);
-        addActorMachineCard(new AssemblingMachine(), tableau.rootActors[3]);
-        addActorMachineCard(new MiningMachine(IngredientMaterial.COPPER), tableau.rootActors[5]);
+        addActorMachineCard(new MiningMachine(IngredientMaterial.COPPER), tableau.rootActors[0]);
+        addActorMachineCard(new MiningMachine(IngredientMaterial.TIN), tableau.rootActors[1]);
 
+        addActorFoundationCard(new FoundationNode(IngredientType.ORE, IngredientMaterial.COPPER), foundation, 0, shop1);
+        addActorFoundationCard(new FoundationNode(IngredientType.INGOT, IngredientMaterial.COPPER), foundation, 1, shop2);
+        addActorFoundationCard(new FoundationNode(IngredientType.INGOT, IngredientMaterial.BRONZE), foundation, 2, null);
+        addActorShopCard(FurnaceMachine::new, shop1.rootActors[0]);
+        addActorShopCard(AlloySmelter::new, shop2.rootActors[0]);
+
+        disableSimpleGrid(shop1);
+        disableSimpleGrid(shop2);
         updateAllGrid();
     }
 
@@ -488,5 +489,9 @@ public final class ContextWrk implements ContextUi {
                 cardChild.setColor(Color.WHITE);
             }
         }
+    }
+
+    public static String upperFirstLetter(String s) {
+        return s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase();
     }
 }

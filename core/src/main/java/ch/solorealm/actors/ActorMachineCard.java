@@ -91,7 +91,7 @@ public class ActorMachineCard extends Table implements GetCardChildren {
         machineNameLabel.setColor(Color.BLACK);
         machineNameLabel.setFontScale(SCALE_FACTOR);
         String displayName = data.getMachineDisplayName();
-        if (displayName.length() >= 12 * data.edges.length) {
+        if (displayName.length() >= 10 * data.edges.length) {
             machineNameLabel.setFontScale(12f / ((float) displayName.length() / data.edges.length));
         }
 
@@ -165,7 +165,7 @@ public class ActorMachineCard extends Table implements GetCardChildren {
         if (edgeActor == null) return;
         Vector2 edgeActorCoords = edgeActor.localToStageCoordinates(new Vector2(0, 0));
         ingredientActor.setPosition(edgeActorCoords.x, edgeActorCoords.y);
-        if (ingredientActor.getWidth() < 48) {
+        if (ingredientActor.getWidth() != 48) {
             float scale = 48f / ingredientActor.getWidth();
             ingredientActor.setSize(ingredientActor.getWidth() * scale, ingredientActor.getWidth() * scale);
         }
