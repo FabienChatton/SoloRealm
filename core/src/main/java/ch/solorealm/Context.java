@@ -1,5 +1,6 @@
 package ch.solorealm;
 
+import ch.solorealm.beans.levels.LevelGenerator;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Sound;
@@ -14,6 +15,7 @@ public class Context implements Disposable {
     public final Stage stage;
     public final ContextWrk contextWrk;
     public final SoundsManager soundsManager;
+    public final ContextMenu contextMenu;
 
     public Context(Stage stage) {
         assetManager = new AssetManager();
@@ -21,11 +23,13 @@ public class Context implements Disposable {
         this.stage = stage;
         contextWrk = new ContextWrk(this);
         soundsManager = new SoundsManager(this);
+        contextMenu = new ContextMenu(this);
     }
 
     public void initializeGame() {
         loadAsset();
-        contextWrk.createGrid();
+        contextMenu.createMenu();
+        // contextWrk.createGrid();
     }
 
     public void loadAsset() {
@@ -48,8 +52,13 @@ public class Context implements Disposable {
         assetManager.load("sounds/stone2.mp3", Sound.class);
         assetManager.load("sounds/exp-multi.mp3", Sound.class);
         assetManager.load("bg/bg.jpg", Texture.class);
+        assetManager.load("bg/Chapiter_1.png", Texture.class);
         assetManager.finishLoading();
 
+    }
+
+    public void setLevel(LevelGenerator levelGenerator) {
+        contextWrk.createGrid(levelGenerator);
     }
 
     @Override

@@ -6,9 +6,11 @@ import ch.solorealm.actors.RootGridActor;
 import ch.solorealm.beans.ContextUi;
 import ch.solorealm.beans.RootGrid;
 import ch.solorealm.beans.ingredient.IngredientCard;
-import ch.solorealm.beans.ingredient.IngredientMaterial;
-import ch.solorealm.beans.ingredient.IngredientType;
-import ch.solorealm.beans.machine.*;
+import ch.solorealm.beans.levels.ActorCardData;
+import ch.solorealm.beans.levels.LevelGenerator;
+import ch.solorealm.beans.machine.FoundationNode;
+import ch.solorealm.beans.machine.MachineEdge;
+import ch.solorealm.beans.machine.MachineNode;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
@@ -47,7 +49,9 @@ public final class ContextWrk implements ContextUi {
         rootGridActors = new HashSet<>();
     }
 
-    public void createGrid() {
+    public void createGrid(LevelGenerator levelGenerator) {
+        context.stage.clear();
+
         tableau = new RootGridActor(new RootGrid(6), context.skin, context.assetManager.get("cards/empty_root.png"));
         rootGridActors.add(tableau);
         for (int i = 0; i < tableau.rootActors.length; i++) {
@@ -122,15 +126,38 @@ public final class ContextWrk implements ContextUi {
         bgImage.toBack();
 
 
-        // test
-        addActorMachineCard(new MiningMachine(IngredientMaterial.COPPER), tableau.rootActors[0]);
-        addActorMachineCard(new MiningMachine(IngredientMaterial.TIN), tableau.rootActors[1]);
+        for (ActorCardData initialTableau : levelGenerator.initialTableau) {
+            addActorMachineCard(initialTableau.machineNode(), tableau.rootActors[initialTableau.index()]);
+        }
 
-        addActorFoundationCard(new FoundationNode(IngredientType.ORE, IngredientMaterial.COPPER), foundation, 0, shop1);
-        addActorFoundationCard(new FoundationNode(IngredientType.INGOT, IngredientMaterial.COPPER), foundation, 1, shop2);
-        addActorFoundationCard(new FoundationNode(IngredientType.INGOT, IngredientMaterial.BRONZE), foundation, 2, null);
-        addActorShopCard(FurnaceMachine::new, shop1.rootActors[0]);
-        addActorShopCard(AlloySmelter::new, shop2.rootActors[0]);
+        FoundationNode[] initialFoundation = levelGenerator.initialFoundation;
+        for (int i = 0; i < initialFoundation.length; i++) {
+            FoundationNode foundationNode = initialFoundation[i];
+            RootGridActor shop = null;
+            if (i == 0) {
+                shop = shop1;
+            } else if (i == 1) {
+                shop = shop2;
+            }
+            addActorFoundationCard(foundationNode, foundation, i, shop);
+        }
+
+        int shopI = 0;
+        int widthI = 0;
+        for (ActorCardData actorCardData : levelGenerator.initialShop) {
+            if (actorCardData.index() > shopI) {
+                shopI = actorCardData.index();
+                widthI = 0;
+            }
+            RootGridActor shop = null;
+            if (shopI == 0) {
+                shop = shop1;
+            } else if (shopI == 1) {
+                shop = shop2;
+            }
+            addActorShopCard(actorCardData::machineNode, shop.rootActors[widthI]);
+            widthI += actorCardData.machineNode().edges.length;
+        }
 
         disableSimpleGrid(shop1);
         disableSimpleGrid(shop2);
