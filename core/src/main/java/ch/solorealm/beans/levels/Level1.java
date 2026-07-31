@@ -9,16 +9,16 @@ import ch.solorealm.beans.machine.MiningMachine;
 
 public class Level1 extends LevelGenerator {
     public Level1() {
-        super(new ActorCardData[]{
-            new ActorCardData(new MiningMachine(IngredientMaterial.COPPER), 0),
-            new ActorCardData(new MiningMachine(IngredientMaterial.TIN), 1)
+        super(new TableauNode[]{
+            new TableauNode(new MiningMachine(IngredientMaterial.COPPER), 0),
+            new TableauNode(new MiningMachine(IngredientMaterial.TIN), 1)
         }, new FoundationNode[]{
             new FoundationNode(IngredientType.ORE, IngredientMaterial.COPPER),
             new FoundationNode(IngredientType.INGOT, IngredientMaterial.COPPER),
             new FoundationNode(IngredientType.INGOT, IngredientMaterial.BRONZE)
-        }, new ActorCardData[]{
-            new ActorCardData(new FurnaceMachine(), 0),
-            new ActorCardData(new AlloySmelter(), 1)
+        }, new ShopNode[]{
+            new ShopNode(FurnaceMachine::new, 0),
+            new ShopNode(AlloySmelter::new, 1)
         });
     }
 }

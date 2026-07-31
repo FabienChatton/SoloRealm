@@ -6,8 +6,9 @@ import ch.solorealm.actors.RootGridActor;
 import ch.solorealm.beans.ContextUi;
 import ch.solorealm.beans.RootGrid;
 import ch.solorealm.beans.ingredient.IngredientCard;
-import ch.solorealm.beans.levels.ActorCardData;
 import ch.solorealm.beans.levels.LevelGenerator;
+import ch.solorealm.beans.levels.ShopNode;
+import ch.solorealm.beans.levels.TableauNode;
 import ch.solorealm.beans.machine.FoundationNode;
 import ch.solorealm.beans.machine.MachineEdge;
 import ch.solorealm.beans.machine.MachineNode;
@@ -126,7 +127,7 @@ public final class ContextWrk implements ContextUi {
         bgImage.toBack();
 
 
-        for (ActorCardData initialTableau : levelGenerator.initialTableau) {
+        for (TableauNode initialTableau : levelGenerator.initialTableau) {
             addActorMachineCard(initialTableau.machineNode(), tableau.rootActors[initialTableau.index()]);
         }
 
@@ -144,9 +145,9 @@ public final class ContextWrk implements ContextUi {
 
         int shopI = 0;
         int widthI = 0;
-        for (ActorCardData actorCardData : levelGenerator.initialShop) {
-            if (actorCardData.index() > shopI) {
-                shopI = actorCardData.index();
+        for (ShopNode actorCardData : levelGenerator.initialShop) {
+            if (actorCardData.shopLevel() > shopI) {
+                shopI = actorCardData.shopLevel();
                 widthI = 0;
             }
             RootGridActor shop = null;
@@ -155,8 +156,8 @@ public final class ContextWrk implements ContextUi {
             } else if (shopI == 1) {
                 shop = shop2;
             }
-            addActorShopCard(actorCardData::machineNode, shop.rootActors[widthI]);
-            widthI += actorCardData.machineNode().edges.length;
+            ActorMachineCard card = addActorShopCard(actorCardData.machineNodeSupplier(), shop.rootActors[widthI]);
+            widthI += card.data.edges.length;
         }
 
         disableSimpleGrid(shop1);
@@ -194,7 +195,7 @@ public final class ContextWrk implements ContextUi {
         addDndIngredientDst(card, onValidatedFoundation);
     }
 
-    public void addActorShopCard(Supplier<MachineNode> machineNodeConstructor, RootActor parent) {
+    public ActorMachineCard addActorShopCard(Supplier<MachineNode> machineNodeConstructor, RootActor parent) {
         MachineNode originalData = machineNodeConstructor.get();
 
         ActorMachineCard card = new ActorMachineCard(context.skin, originalData,
@@ -210,6 +211,7 @@ public final class ContextWrk implements ContextUi {
             addActorShopCard(machineNodeConstructor, parent);
             updateAllGrid();
         }));
+        return card;
     }
 
     private void addDndIngredientDst(ActorMachineCard card, Runnable drop) {
