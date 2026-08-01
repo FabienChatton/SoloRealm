@@ -38,4 +38,16 @@ public class SoundsManager {
         Sound sound = context.assetManager.get("sounds/exp-multi.mp3", Sound.class);
         sound.play();
     }
+
+    public void playEnterLevel() {
+        Sound sound = context.assetManager.get("sounds/mm_join.wav", Sound.class);
+        long play = sound.play();
+        sound.setVolume(play, 0.5f);
+    }
+
+    public void playMenuFocus() {
+        Sound sound = context.assetManager.get("sounds/menu_focus.wav", Sound.class);
+        long play = sound.play();
+        sound.setVolume(play, 0.5f);
+    }
 }

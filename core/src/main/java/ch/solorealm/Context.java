@@ -9,6 +9,9 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.Disposable;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BooleanSupplier;
+
 public class Context implements Disposable {
     public final AssetManager assetManager;
     public final Skin skin;
@@ -29,7 +32,6 @@ public class Context implements Disposable {
     public void initializeGame() {
         loadAsset();
         contextMenu.createMenu();
-        // contextWrk.createGrid();
     }
 
     public void loadAsset() {
@@ -51,6 +53,8 @@ public class Context implements Disposable {
         assetManager.load("sounds/stone1.mp3", Sound.class);
         assetManager.load("sounds/stone2.mp3", Sound.class);
         assetManager.load("sounds/exp-multi.mp3", Sound.class);
+        assetManager.load("sounds/mm_join.wav", Sound.class);
+        assetManager.load("sounds/menu_focus.wav", Sound.class);
         assetManager.load("bg/bg.jpg", Texture.class);
         assetManager.load("bg/Chapiter_1.png", Texture.class);
         assetManager.finishLoading();
@@ -59,6 +63,17 @@ public class Context implements Disposable {
 
     public void setLevel(LevelGenerator levelGenerator) {
         contextWrk.createGrid(levelGenerator);
+    }
+
+    public static Runnable onlyEdgeTrigger(BooleanSupplier test, Runnable run) {
+        AtomicBoolean old = new AtomicBoolean(test.getAsBoolean());
+        return () -> {
+            boolean newTest = test.getAsBoolean();
+            if (!old.get() && newTest) {
+                run.run();
+                old.set(true);
+            }
+        };
     }
 
     @Override

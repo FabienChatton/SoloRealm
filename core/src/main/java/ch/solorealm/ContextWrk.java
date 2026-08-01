@@ -27,7 +27,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 public final class ContextWrk implements ContextUi {
@@ -51,7 +50,7 @@ public final class ContextWrk implements ContextUi {
     }
 
     public void createGrid(LevelGenerator levelGenerator) {
-        context.stage.clear();
+        context.stage.getActors().clear();
 
         tableau = new RootGridActor(new RootGrid(6), context.skin, context.assetManager.get("cards/empty_root.png"));
         rootGridActors.add(tableau);
@@ -205,7 +204,7 @@ public final class ContextWrk implements ContextUi {
         card.setParentActor(parent);
         context.stage.addActor(card);
 
-        addDndMachineSrc(card, onlyWhenEnterTableau(card.data, () -> {
+        addDndMachineSrc(card, Context.onlyEdgeTrigger(() -> tableau.findActorMachineNode(card.data) != null, () -> {
             addDndMachineDst(card);
             addDndIngredientDst(card);
             addActorShopCard(machineNodeConstructor, parent);
@@ -479,19 +478,6 @@ public final class ContextWrk implements ContextUi {
             }
         }
         return find;
-    }
-
-    private Runnable onlyWhenEnterTableau(MachineNode node, Runnable run) {
-        boolean initialEnter = tableau.findActorMachineNode(node) != null;
-        AtomicBoolean wasInTableau = new AtomicBoolean(initialEnter);
-
-        return () -> {
-            boolean isInTableau = tableau.findActorMachineNode(node) != null;
-            if (!wasInTableau.get() && isInTableau) {
-                run.run();
-                wasInTableau.set(true);
-            }
-        };
     }
 
     private void disableSimpleGrid(RootGridActor gridActor) {

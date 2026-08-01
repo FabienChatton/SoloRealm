@@ -2,11 +2,17 @@ package ch.solorealm;
 
 import ch.solorealm.beans.levels.Level1;
 import ch.solorealm.beans.levels.LevelGenerator;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.Action;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.actions.SequenceAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -55,7 +61,6 @@ public class ContextMenu {
         chapterPanel.add(divider).fillX().height(1).padBottom(20).row();
         chapterPanel.padLeft(20).padRight(20).padBottom(20);
 
-        // Ajout des lignes d'objectifs
         chapterPanel.add(createLevelRow("Test Level", new Level1())).row();
         return chapterPanel;
     }
@@ -75,12 +80,54 @@ public class ContextMenu {
         row.setTouchable(Touchable.enabled);
         row.addListener(new ClickListener() {
             @Override
+            public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+                super.enter(event, x, y, pointer, fromActor);
+                if (pointer == -1 && (fromActor == null || !fromActor.isDescendantOf(event.getListenerActor()))) {
+                    context.soundsManager.playMenuFocus();
+                }
+            }
+
+            @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                context.setLevel(levelGenerator);
+                context.stage.addAction(Actions.sequence(
+                    Actions.run(context.soundsManager::playEnterLevel),
+                    fadeTransition(true, false),
+                    Actions.run(() -> context.setLevel(levelGenerator)),
+                    fadeTransition(false, true)
+                ));
                 return super.touchDown(event, x, y, pointer, button);
             }
         });
         return row;
+    }
+
+    private Action fadeTransition(boolean fadeIn, boolean removeImgAfter) {
+        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pixmap.setColor(Color.BLACK);
+        pixmap.fill();
+
+        Texture texture = new Texture(pixmap);
+        pixmap.dispose();
+
+        Image fadeImg = new Image(new TextureRegionDrawable(new TextureRegion(texture)));
+        fadeImg.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        if (fadeIn) {
+            fadeImg.getColor().a = 0f;
+        } else {
+            fadeImg.getColor().a = 1f;
+        }
+        Action fadeAction;
+        if (fadeIn) {
+            fadeAction = Actions.fadeIn(0.5f);
+        } else {
+            fadeAction = Actions.fadeOut(0.5f);
+        }
+        fadeAction.setTarget(fadeImg);
+        SequenceAction sequence = Actions.sequence(Actions.run(() -> context.stage.addActor(fadeImg)), fadeAction);
+        if (removeImgAfter) {
+            return Actions.sequence(sequence, Actions.run(fadeImg::remove));
+        }
+        return sequence;
     }
 
     private static Image getDivider() {
