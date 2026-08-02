@@ -50,4 +50,10 @@ public class SoundsManager {
         long play = sound.play();
         sound.setVolume(play, 0.5f);
     }
+
+    public void playEndLevel() {
+        Sound sound = context.assetManager.get("sounds/achievement_earned.wav", Sound.class);
+        long play = sound.play();
+        sound.setVolume(play, 0.5f);
+    }
 }

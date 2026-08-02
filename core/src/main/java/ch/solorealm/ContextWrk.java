@@ -18,6 +18,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
 import com.badlogic.gdx.scenes.scene2d.actions.ScaleToAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -27,6 +28,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public final class ContextWrk implements ContextUi {
@@ -139,7 +141,14 @@ public final class ContextWrk implements ContextUi {
             } else if (i == 1) {
                 shop = shop2;
             }
-            addActorFoundationCard(foundationNode, foundation, i, shop);
+
+            Consumer<ActorMachineCard> onValidatedFondation;
+            if (shop != null) {
+                onValidatedFondation = unlockShop(shop);
+            } else {
+                onValidatedFondation = endLevel();
+            }
+            addActorFoundationCard(foundationNode, foundation, i, onValidatedFondation);
         }
 
         int shopI = 0;
@@ -164,6 +173,16 @@ public final class ContextWrk implements ContextUi {
         updateAllGrid();
     }
 
+    private Consumer<ActorMachineCard> endLevel() {
+        return (card) -> context.stage.addAction(Actions.sequence(
+            Actions.run(context.soundsManager::playEndLevel),
+            context.contextMenu.fadeTransition(true, false),
+            Actions.parallel(
+                Actions.run(context.contextMenu::createMenu),
+                context.contextMenu.fadeTransition(false, true)
+            )));
+    }
+
     public void addActorMachineCard(MachineNode data, RootActor parent) {
         ActorMachineCard card = new ActorMachineCard(context.skin, data,
             context.assetManager.get(data.getAssetRecourcePath()),
@@ -177,7 +196,7 @@ public final class ContextWrk implements ContextUi {
         addDndIngredientDst(card);
     }
 
-    public void addActorFoundationCard(MachineNode data, RootGridActor foundation, int index, RootGridActor linkedShop) {
+    public void addActorFoundationCard(MachineNode data, RootGridActor foundation, int index, Consumer<ActorMachineCard> onValidatedFondation) {
         RootActor parent = foundation.rootActors[index];
         ActorMachineCard card = new ActorMachineCard(context.skin, data,
             context.assetManager.get(data.getAssetRecourcePath()),
@@ -186,12 +205,15 @@ public final class ContextWrk implements ContextUi {
         card.setParentActor(parent);
         context.stage.addActor(card);
 
-        Runnable onValidatedFoundation = () -> {
+        addDndIngredientDst(card, onValidatedFondation);
+    }
+
+    private Consumer<ActorMachineCard> unlockShop(RootGridActor linkedShop) {
+        return (newShopCard) -> {
             enableSimpleGrid(linkedShop);
-            disableCard(card);
+            disableCard(newShopCard);
             context.soundsManager.playValidatedFoundation();
         };
-        addDndIngredientDst(card, onValidatedFoundation);
     }
 
     public ActorMachineCard addActorShopCard(Supplier<MachineNode> machineNodeConstructor, RootActor parent) {
@@ -213,7 +235,7 @@ public final class ContextWrk implements ContextUi {
         return card;
     }
 
-    private void addDndIngredientDst(ActorMachineCard card, Runnable drop) {
+    private void addDndIngredientDst(ActorMachineCard card, Consumer<ActorMachineCard> drop) {
         card.dndIngredientDst = true;
         for (MachineEdge machineEdge : card.edgeActorMap.keySet()) {
             for (int i = 0; i < card.edgeActorMap.get(machineEdge).length; i++) {
@@ -233,7 +255,7 @@ public final class ContextWrk implements ContextUi {
                         moveActorIngredientCard(ingredientCard, ingredientCard.edgeAttached, machineEdge, inputSlot);
                         context.soundsManager.playIngredientDragDrop();
                         if (drop != null) {
-                            drop.run();
+                            drop.accept(card);
                         }
                     }
                 });

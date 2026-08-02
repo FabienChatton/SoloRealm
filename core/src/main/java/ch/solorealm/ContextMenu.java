@@ -27,7 +27,7 @@ public class ContextMenu {
     }
 
     public void createMenu() {
-        context.stage.clear();
+        context.stage.getActors().clear();
 
         Table rootTable = new Table();
         rootTable.setFillParent(true);
@@ -92,8 +92,10 @@ public class ContextMenu {
                 context.stage.addAction(Actions.sequence(
                     Actions.run(context.soundsManager::playEnterLevel),
                     fadeTransition(true, false),
-                    Actions.run(() -> context.setLevel(levelGenerator)),
-                    fadeTransition(false, true)
+                    Actions.parallel(
+                        Actions.run(() -> context.setLevel(levelGenerator)),
+                        fadeTransition(false, true)
+                    )
                 ));
                 return super.touchDown(event, x, y, pointer, button);
             }
@@ -101,7 +103,7 @@ public class ContextMenu {
         return row;
     }
 
-    private Action fadeTransition(boolean fadeIn, boolean removeImgAfter) {
+    public Action fadeTransition(boolean fadeIn, boolean removeImgAfter) {
         Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
         pixmap.setColor(Color.BLACK);
         pixmap.fill();

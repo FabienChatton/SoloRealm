@@ -55,6 +55,7 @@ public class Context implements Disposable {
         assetManager.load("sounds/exp-multi.mp3", Sound.class);
         assetManager.load("sounds/mm_join.wav", Sound.class);
         assetManager.load("sounds/menu_focus.wav", Sound.class);
+        assetManager.load("sounds/achievement_earned.wav", Sound.class);
         assetManager.load("bg/bg.jpg", Texture.class);
         assetManager.load("bg/Chapiter_1.png", Texture.class);
         assetManager.finishLoading();
