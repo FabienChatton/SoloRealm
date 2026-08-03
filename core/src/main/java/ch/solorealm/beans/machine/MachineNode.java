@@ -23,7 +23,11 @@ public abstract class MachineNode implements GetAssetResource {
         if (specialRecipe.input().length == 0) throw new IllegalArgumentException(String.format("\"%s\" must have at least one input. Output recipe: %s", getClass().getName(), specialRecipe.output()));
         this.specialRecipe = specialRecipe;
         edges = new MachineEdge[specialRecipe.input().length];
-        edges[0] = new MachineEdge(IngredientType._COMPLEX, IngredientType._COMPLEX);
+        if (specialRecipe.output() == null) {
+            edges[0] = new MachineEdge(IngredientType._COMPLEX, null);
+        } else {
+            edges[0] = new MachineEdge(IngredientType._COMPLEX, IngredientType._COMPLEX);
+        }
         int nInput = specialRecipe.input().length;
         for (int i = 1; i < nInput; i++) {
             edges[i] = new MachineEdge(IngredientType._COMPLEX, null);

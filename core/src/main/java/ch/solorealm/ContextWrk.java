@@ -464,18 +464,6 @@ public final class ContextWrk implements ContextUi {
         context.soundsManager.playProcess();
     }
 
-    private RootActor[] concatTableauFoundationRoot() {
-        RootActor[] concat  = new RootActor[tableau.rootActors.length + foundation.rootActors.length];
-        int i = 0;
-        for (RootActor rootActor : tableau.rootActors) {
-            concat[i++] = rootActor;
-        }
-        for (RootActor rootActor : foundation.rootActors) {
-            concat[i++] = rootActor;
-        }
-        return concat;
-    }
-
     private Set<ActorMachineCard> getAllActorMachineNodeAnyWhere() {
         Set<ActorMachineCard> machines = new HashSet<>();
         Queue<ActorMachineCard> actorMachineCardsQueue = new LinkedList<>();

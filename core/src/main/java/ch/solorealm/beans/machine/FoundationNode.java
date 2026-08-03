@@ -2,14 +2,16 @@ package ch.solorealm.beans.machine;
 
 import ch.solorealm.ContextWrk;
 import ch.solorealm.beans.ingredient.IngredientMaterial;
+import ch.solorealm.beans.ingredient.IngredientSpecialRecipe;
 import ch.solorealm.beans.ingredient.IngredientType;
+import ch.solorealm.beans.ingredient.IngredientTypeMaterialPair;
 
 public class FoundationNode extends MachineNode {
     public final IngredientType ingredientType;
     public final IngredientMaterial ingredientMaterial;
 
     public FoundationNode(IngredientType ingredientType, IngredientMaterial ingredientMaterial) {
-        super(new MachineEdge[]{new MachineEdge(ingredientType, null)});
+        super(new IngredientSpecialRecipe(null, new IngredientTypeMaterialPair(ingredientType, ingredientMaterial)));
         this.ingredientType = ingredientType;
         this.ingredientMaterial = ingredientMaterial;
     }
