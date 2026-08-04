@@ -7,9 +7,8 @@ import ch.solorealm.beans.ingredient.IngredientType;
 public class MiningMachine extends MachineNode {
     private final IngredientMaterial material;
     public MiningMachine(IngredientMaterial material) {
-        super(new MachineEdge[]{new MachineEdge(null, IngredientType.ORE)});
+        super(new MachineEdge[]{new MachineEdge(null, null, IngredientType.ORE, material)});
         this.material = material;
-        edges[0].exNihiloMaterial = material;
     }
 
     @Override

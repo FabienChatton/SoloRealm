@@ -3,7 +3,6 @@ package ch.solorealm.beans.machine;
 import ch.solorealm.beans.ingredient.IngredientCard;
 import ch.solorealm.beans.ingredient.IngredientMaterial;
 import ch.solorealm.beans.ingredient.IngredientType;
-import ch.solorealm.beans.ingredient.IngredientTypeMaterialPair;
 
 public class MachineEdge {
     private MachineNode node;
@@ -11,14 +10,21 @@ public class MachineEdge {
     private int edgeIndex;
 
     public final IngredientType inputType;
+    public final IngredientMaterial inputMaterial;
     public final IngredientType outputType;
+    public final IngredientMaterial outputMaterial;
     public IngredientCard input;
     public IngredientCard output;
-    public IngredientMaterial exNihiloMaterial;
 
-    public MachineEdge(IngredientType inputType, IngredientType outputType) {
+    public MachineEdge(IngredientType inputType, IngredientMaterial inputMaterial, IngredientType outputType) {
+        this(inputType, inputMaterial, outputType, inputMaterial);
+    }
+
+    public MachineEdge(IngredientType inputType, IngredientMaterial inputMaterial, IngredientType outputType, IngredientMaterial outputMaterial) {
         this.inputType = inputType;
+        this.inputMaterial = inputMaterial;
         this.outputType = outputType;
+        this.outputMaterial = outputMaterial;
     }
 
     public void setNode(MachineNode node) {
@@ -44,33 +50,9 @@ public class MachineEdge {
     public boolean isDropValide(IngredientCard ingredientCard, boolean inputSlot) {
         if (!inputSlot) return false;
         if (input != null) return false;
-        if (inputType != IngredientType._COMPLEX) {
-            return ingredientCard.ingredientType == inputType;
-        } else {
-            int require = 0;
-            int already = 0;
-            IngredientTypeMaterialPair[] inputRecipe = node.specialRecipe.input();
-            for (IngredientTypeMaterialPair ingredientTypeMaterialPair : inputRecipe) {
-                if (ingredientCard.ingredientMaterial == ingredientTypeMaterialPair.material() &&
-                    ingredientCard.ingredientType == ingredientTypeMaterialPair.type()) {
-                    require++;
-                }
-            }
-            if (require == 0) {
-                return false;
-            }
-            for (MachineEdge edge : node.edges) {
-                if (edge.input == null) continue;
-                if (ingredientCard.ingredientMaterial == edge.input.ingredientMaterial &&
-                    ingredientCard.ingredientType == edge.input.ingredientType) {
-                    already++;
-                    if (already == require) {
-                        return false;
-                    }
-                }
-            }
-            return true;
-        }
+        if (inputType == null) return false;
+        if (inputMaterial == null) return false;
+        return inputType.isCompatible(ingredientCard.ingredientType) && inputMaterial.isCompatible(ingredientCard.ingredientMaterial);
     }
 
     public void moveIngredientCard(IngredientCard ingredientCard, MachineEdge dstEdge, boolean dstInputSlot) {

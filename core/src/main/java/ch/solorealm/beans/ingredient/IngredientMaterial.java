@@ -1,17 +1,15 @@
 package ch.solorealm.beans.ingredient;
 
-import java.util.function.Function;
-
 public enum IngredientMaterial {
-    COPPER(CopperIngredient::new),
-    IRON(IronIngredient::new),
-    TIN(TinIngredient::new),
-    BRONZE(BronzeIngredient::new),
+    ANY,
+    COPPER,
+    IRON,
+    TIN,
+    BRONZE,
     ;
 
-    public final Function<IngredientType, IngredientCard> ingredientConstructor;
-
-    IngredientMaterial(Function<IngredientType, IngredientCard> ingredientConstructor) {
-        this.ingredientConstructor = ingredientConstructor;
+    public boolean isCompatible(IngredientMaterial inputMaterial) {
+        if (this == ANY) return true;
+        return this == inputMaterial;
     }
 }

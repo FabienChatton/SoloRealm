@@ -3,12 +3,14 @@ package ch.solorealm.beans.ingredient;
 import ch.solorealm.beans.GetAssetResource;
 import ch.solorealm.beans.machine.MachineEdge;
 
-public abstract class IngredientCard implements GetAssetResource {
+public class IngredientCard implements GetAssetResource {
     public final IngredientMaterial ingredientMaterial;
     public final IngredientType ingredientType;
     public MachineEdge edgeAttached;
 
     public IngredientCard(IngredientMaterial ingredientMaterial, IngredientType ingredientType) {
+        if (ingredientMaterial == IngredientMaterial.ANY) throw new IllegalArgumentException("IngredientMaterial cannot be any for a card");
+        if (ingredientType == IngredientType.ANY) throw new IllegalArgumentException("IngredientType cannot be any for a card");
         this.ingredientType = ingredientType;
         this.ingredientMaterial = ingredientMaterial;
     }

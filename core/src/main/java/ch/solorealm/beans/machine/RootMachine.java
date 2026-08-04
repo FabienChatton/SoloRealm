@@ -3,7 +3,7 @@ package ch.solorealm.beans.machine;
 public class RootMachine extends MachineNode {
     public RootMachine() {
         super(new MachineEdge[] {
-            new MachineEdge(null, null)
+            new MachineEdge(null, null, null)
         });
     }
 
