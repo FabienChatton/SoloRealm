@@ -1,6 +1,7 @@
 package ch.solorealm.actors;
 
 import ch.solorealm.beans.ingredient.IngredientCard;
+import ch.solorealm.beans.machine.EdgeIOSettings;
 import ch.solorealm.beans.machine.MachineEdge;
 import ch.solorealm.beans.machine.MachineNode;
 import com.badlogic.gdx.graphics.Color;
@@ -58,7 +59,7 @@ public class ActorMachineCard extends Table implements GetCardChildren {
 
             Image inputArrowImage = null;
             Image outputArrowImage = null;
-            if (edge.inputType != null) {
+            if (edge.edgeIOSettings == EdgeIOSettings.INPUT || edge.edgeIOSettings == EdgeIOSettings.INPUT_OUTPUT) {
                 inputArrowImage = new Image(arrowTexture);
                 inputArrowImage.setOrigin(arrowW / 2f, arrowH / 2f);
                 inputArrowImage.rotateBy(180);
@@ -68,7 +69,7 @@ public class ActorMachineCard extends Table implements GetCardChildren {
                 edgeTable.add().size(arrowW, arrowH);
             }
 
-            if (edge.outputType != null) {
+            if (edge.edgeIOSettings == EdgeIOSettings.OUTPUT || edge.edgeIOSettings == EdgeIOSettings.INPUT_OUTPUT) {
                 outputArrowImage = new Image(arrowTexture);
                 edgeTable.add(outputArrowImage).size(arrowW, arrowH);
             } else {

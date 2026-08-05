@@ -2,6 +2,7 @@ package ch.solorealm.beans.machine;
 
 import ch.solorealm.ContextWrk;
 import ch.solorealm.beans.ingredient.IngredientMaterial;
+import ch.solorealm.beans.ingredient.IngredientPair;
 import ch.solorealm.beans.ingredient.IngredientType;
 
 public class FoundationNode extends MachineNode {
@@ -9,7 +10,7 @@ public class FoundationNode extends MachineNode {
     public final IngredientMaterial ingredientMaterial;
 
     public FoundationNode(IngredientType ingredientType, IngredientMaterial ingredientMaterial) {
-        super(new MachineEdge[]{new MachineEdge(ingredientType, ingredientMaterial, null)});
+        super(EdgeIOSettings.INPUT, new MachineProcessRecipe(null, new IngredientPair(ingredientType, ingredientMaterial)));
         this.ingredientType = ingredientType;
         this.ingredientMaterial = ingredientMaterial;
     }

@@ -1,30 +1,18 @@
 package ch.solorealm.beans.machine;
 
 import ch.solorealm.beans.ingredient.IngredientCard;
-import ch.solorealm.beans.ingredient.IngredientMaterial;
-import ch.solorealm.beans.ingredient.IngredientType;
 
 public class MachineEdge {
     private MachineNode node;
     private MachineNode childNode;
     private int edgeIndex;
 
-    public final IngredientType inputType;
-    public final IngredientMaterial inputMaterial;
-    public final IngredientType outputType;
-    public final IngredientMaterial outputMaterial;
+    public final EdgeIOSettings edgeIOSettings;
     public IngredientCard input;
     public IngredientCard output;
 
-    public MachineEdge(IngredientType inputType, IngredientMaterial inputMaterial, IngredientType outputType) {
-        this(inputType, inputMaterial, outputType, inputMaterial);
-    }
-
-    public MachineEdge(IngredientType inputType, IngredientMaterial inputMaterial, IngredientType outputType, IngredientMaterial outputMaterial) {
-        this.inputType = inputType;
-        this.inputMaterial = inputMaterial;
-        this.outputType = outputType;
-        this.outputMaterial = outputMaterial;
+    public MachineEdge(EdgeIOSettings edgeIOSettings) {
+        this.edgeIOSettings = edgeIOSettings;
     }
 
     public void setNode(MachineNode node) {
@@ -50,9 +38,10 @@ public class MachineEdge {
     public boolean isDropValide(IngredientCard ingredientCard, boolean inputSlot) {
         if (!inputSlot) return false;
         if (input != null) return false;
-        if (inputType == null) return false;
-        if (inputMaterial == null) return false;
-        return inputType.isCompatible(ingredientCard.ingredientType) && inputMaterial.isCompatible(ingredientCard.ingredientMaterial);
+        if (node instanceof FurnaceMachine) {
+            System.out.println();
+        }
+        return node.isValideProcessRecipe(ingredientCard);
     }
 
     public void moveIngredientCard(IngredientCard ingredientCard, MachineEdge dstEdge, boolean dstInputSlot) {

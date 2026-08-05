@@ -4,15 +4,34 @@ import ch.solorealm.beans.ContextUi;
 import ch.solorealm.beans.GetAssetResource;
 import ch.solorealm.beans.ingredient.IngredientCard;
 import ch.solorealm.beans.ingredient.IngredientMaterial;
+import ch.solorealm.beans.ingredient.IngredientPair;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public abstract class MachineNode implements GetAssetResource {
     public final MachineEdge[] edges;
+    public final List<MachineProcessRecipe> machineProcessRecipes;
     private MachineEdge parent;
 
-    public MachineNode(MachineEdge[] edges) {
-        if (edges.length == 0) throw new IllegalArgumentException(String.format("\"%s\" must have at least one edge", getClass().getName()));
-        this.edges = edges;
+    public MachineNode(EdgeIOSettings[] edgeIOSettings, MachineProcessRecipe... machineProcessRecipes) {
+        if (edgeIOSettings.length == 0) throw new IllegalArgumentException(String.format("\"%s\" must have at least one edge", getClass().getName()));
+        edges = new MachineEdge[edgeIOSettings.length];
+        for (int i = 0; i < edgeIOSettings.length; i++) {
+            edges[i] = new MachineEdge(edgeIOSettings[i]);
+        }
+        this.machineProcessRecipes = List.of(machineProcessRecipes);
         postInit();
+    }
+
+    public MachineNode(EdgeIOSettings edgeIOSettings, MachineProcessRecipe... machineProcessRecipes) {
+        this(new EdgeIOSettings[]{edgeIOSettings}, machineProcessRecipes);
+    }
+
+    public MachineNode(EdgeIOSettings edgeIOSettings, IngredientPair output, IngredientPair... input) {
+        this(edgeIOSettings, new MachineProcessRecipe(output, input));
     }
 
     private void postInit() {
@@ -34,33 +53,101 @@ public abstract class MachineNode implements GetAssetResource {
                 }
             }
         }
-
-
-        // all edge input must be full
         // all edge output must be empty
         for (MachineEdge edge : edges) {
-            if (edge.input == null && edge.inputType != null && edge.inputMaterial != null) return;
             if (edge.output != null) return;
         }
+
+        MachineProcessRecipe valideProcessRecipe = null;
+        for (MachineProcessRecipe machineProcessRecipe : machineProcessRecipes) {
+            if (isProcessRecipeFull(machineProcessRecipe)) {
+                valideProcessRecipe = machineProcessRecipe;
+                break;
+            }
+        }
+        if (valideProcessRecipe == null) {
+            return;
+        }
+
         contextUi.clearActorIngredientCard(this);
         for (MachineEdge edge : edges) {
             // process "craft"
-            if (edge.outputType == null) {
+            if (edge.edgeIOSettings == EdgeIOSettings.INPUT) {
                 edge.input = null;
                 continue;
             }
             IngredientMaterial material;
-            if (edge.outputMaterial != IngredientMaterial.ANY) {
-                material = edge.outputMaterial;
+            if (valideProcessRecipe.output().material() != IngredientMaterial.ANY) {
+                material = valideProcessRecipe.output().material();
             } else {
                 material = edge.input.ingredientMaterial;
             }
-            IngredientCard newCardTransformed = new IngredientCard(material, edge.outputType);
+            IngredientCard newCardTransformed = new IngredientCard(material, valideProcessRecipe.output().type());
             newCardTransformed.edgeAttached = edge;
             edge.input = null;
             edge.output = newCardTransformed;
             contextUi.addActorIngredientCard(newCardTransformed, edge, false);
         }
+    }
+
+    public List<MachineProcessRecipe> getAvailableProcessRecipe(Set<IngredientPair> remainingIngredient) {
+        List<MachineProcessRecipe> ret = new ArrayList<>(machineProcessRecipes);
+        for (MachineProcessRecipe machineProcessRecipe : machineProcessRecipes) {
+            boolean valideRecipe = false;
+            for (IngredientPair ingredientInput : machineProcessRecipe.input()) {
+                for (MachineEdge edge : edges) {
+
+                    // for foundation node
+                    if (edge.input == null && edge.edgeIOSettings == EdgeIOSettings.INPUT) {
+                        remainingIngredient.addAll(List.of(machineProcessRecipe.input()));
+                        valideRecipe = true;
+                    }
+
+                    if (edge.input == null) {
+                        remainingIngredient.addAll(List.of(machineProcessRecipe.input()));
+                    } else {
+                        if (ingredientInput.type().isCompatible(edge.input.ingredientType) && ingredientInput.material().isCompatible(edge.input.ingredientMaterial)) {
+                            remainingIngredient.remove(ingredientInput);
+                            valideRecipe = true;
+                        }
+                    }
+                }
+                if (!valideRecipe) {
+                    ret.remove(machineProcessRecipe);
+                }
+            }
+        }
+        return ret;
+    }
+
+    public boolean isProcessRecipeFull(MachineProcessRecipe processRecipe) {
+        edge:
+        for (MachineEdge edge : edges) {
+            if (edge.input == null && edge.edgeIOSettings != EdgeIOSettings.OUTPUT) {
+                return false;
+            }
+            if (processRecipe.input().length == 0) {
+                return true;
+            }
+            for (IngredientPair ingredientPair : processRecipe.input()) {
+                if (ingredientPair.material().isCompatible(edge.input.ingredientMaterial) && ingredientPair.type().isCompatible(edge.input.ingredientType)) {
+                    continue edge;
+                }
+            }
+            return false;
+        }
+        return true;
+    }
+
+    public boolean isValideProcessRecipe(IngredientCard card) {
+        Set<IngredientPair> ingredientPairs = new HashSet<>();
+        getAvailableProcessRecipe(ingredientPairs);
+        for (IngredientPair ingredientPair : ingredientPairs) {
+            if (ingredientPair.material().isCompatible(card.ingredientMaterial) && ingredientPair.type().isCompatible(card.ingredientType)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public abstract String getMachineDisplayName();

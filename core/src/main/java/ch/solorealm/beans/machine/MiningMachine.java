@@ -2,12 +2,13 @@ package ch.solorealm.beans.machine;
 
 import ch.solorealm.ContextWrk;
 import ch.solorealm.beans.ingredient.IngredientMaterial;
+import ch.solorealm.beans.ingredient.IngredientPair;
 import ch.solorealm.beans.ingredient.IngredientType;
 
 public class MiningMachine extends MachineNode {
     private final IngredientMaterial material;
     public MiningMachine(IngredientMaterial material) {
-        super(new MachineEdge[]{new MachineEdge(null, null, IngredientType.ORE, material)});
+        super(EdgeIOSettings.OUTPUT, new MachineProcessRecipe(new IngredientPair(IngredientType.ORE, material)));
         this.material = material;
     }
 
