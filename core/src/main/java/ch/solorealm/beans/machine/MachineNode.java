@@ -90,26 +90,18 @@ public abstract class MachineNode implements GetAssetResource {
         }
     }
 
-    public List<MachineProcessRecipe> getAvailableProcessRecipe(Set<IngredientPair> remainingIngredient) {
+    public List<MachineProcessRecipe> getAvailableProcessRecipe() {
         List<MachineProcessRecipe> ret = new ArrayList<>(machineProcessRecipes);
         for (MachineProcessRecipe machineProcessRecipe : machineProcessRecipes) {
             boolean valideRecipe = false;
             for (IngredientPair ingredientInput : machineProcessRecipe.input()) {
                 for (MachineEdge edge : edges) {
-
-                    // for foundation node
-                    if (edge.input == null && edge.edgeIOSettings == EdgeIOSettings.INPUT) {
-                        remainingIngredient.addAll(List.of(machineProcessRecipe.input()));
-                        valideRecipe = true;
-                    }
-
-                    if (edge.input == null) {
-                        remainingIngredient.addAll(List.of(machineProcessRecipe.input()));
-                    } else {
+                    if (edge.input != null) {
                         if (ingredientInput.type().isCompatible(edge.input.ingredientType) && ingredientInput.material().isCompatible(edge.input.ingredientMaterial)) {
-                            remainingIngredient.remove(ingredientInput);
                             valideRecipe = true;
                         }
+                    } else {
+                        valideRecipe = true;
                     }
                 }
                 if (!valideRecipe) {
@@ -140,14 +132,31 @@ public abstract class MachineNode implements GetAssetResource {
     }
 
     public boolean isValideProcessRecipe(IngredientCard card) {
-        Set<IngredientPair> ingredientPairs = new HashSet<>();
-        getAvailableProcessRecipe(ingredientPairs);
+        List<MachineProcessRecipe> availableProcessRecipe = getAvailableProcessRecipe();
+        Set<IngredientPair> ingredientPairs = getRemainingIngredient(availableProcessRecipe);
         for (IngredientPair ingredientPair : ingredientPairs) {
             if (ingredientPair.material().isCompatible(card.ingredientMaterial) && ingredientPair.type().isCompatible(card.ingredientType)) {
                 return true;
             }
         }
         return false;
+    }
+
+    private Set<IngredientPair> getRemainingIngredient(List<MachineProcessRecipe> availableProcessRecipe) {
+        Set<IngredientPair> ret = new HashSet<>();
+        for (MachineProcessRecipe machineProcessRecipe : availableProcessRecipe) {
+            ret.addAll(List.of(machineProcessRecipe.input()));
+            for (IngredientPair ingredientPair : machineProcessRecipe.input()) {
+                for (MachineEdge edge : edges) {
+                    if (edge.input != null) {
+                        if (ingredientPair.type().isCompatible(edge.input.ingredientType) && ingredientPair.material().isCompatible(edge.input.ingredientMaterial)) {
+                            ret.remove(ingredientPair);
+                        }
+                    }
+                }
+            }
+        }
+        return ret;
     }
 
     public abstract String getMachineDisplayName();

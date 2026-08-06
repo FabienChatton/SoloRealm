@@ -38,9 +38,6 @@ public class MachineEdge {
     public boolean isDropValide(IngredientCard ingredientCard, boolean inputSlot) {
         if (!inputSlot) return false;
         if (input != null) return false;
-        if (node instanceof FurnaceMachine) {
-            System.out.println();
-        }
         return node.isValideProcessRecipe(ingredientCard);
     }
 
