@@ -12,6 +12,7 @@ import ch.solorealm.beans.levels.TableauNode;
 import ch.solorealm.beans.machine.FoundationNode;
 import ch.solorealm.beans.machine.MachineEdge;
 import ch.solorealm.beans.machine.MachineNode;
+import ch.solorealm.beans.machine.TrashMachine;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
@@ -40,6 +41,7 @@ public final class ContextWrk implements ContextUi {
     private RootGridActor shop1;
     private RootGridActor shop2;
     private final Set<RootGridActor> rootGridActors;
+    private RootGridActor trash;
 
     public ContextWrk(Context context) {
         this.context = context;
@@ -121,6 +123,14 @@ public final class ContextWrk implements ContextUi {
         foundation.setPosition(1230, 700);
         foundation.validate();
         context.stage.addActor(foundation);
+
+        trash = new RootGridActor(new RootGrid(1), context.skin, context.assetManager.get("cards/empty_root.png"));
+        rootGridActors.add(trash);
+        trash.setPosition(108, 150);
+        trash.validate();
+        context.stage.addActor(trash);
+        addActorTrashCard(new TrashMachine(), trash, 0);
+
 
         Image bgImage = new Image(context.assetManager.get("bg/bg.jpg", Texture.class));
         bgImage.setSize(1488, 837);
@@ -208,6 +218,33 @@ public final class ContextWrk implements ContextUi {
         addDndIngredientDst(card, onValidatedFondation);
     }
 
+    private void addActorTrashCard(TrashMachine data, RootGridActor trash, int index) {
+        RootActor parent = trash.rootActors[index];
+        ActorMachineCard card = new ActorMachineCard(context.skin, data,
+            context.assetManager.get(data.getAssetRecourcePath()),
+            context.assetManager.get("cards/empty_card.png"),
+            context.assetManager.get("machines/Grid_Overclocker_Upgrade.png"));
+        card.setParentActor(parent);
+        context.stage.addActor(card);
+
+        addDndIngredientDst(card, actorDrop -> {
+            clearActorIngredientCard(card);
+            card.data.edges[0].input = null;
+        });
+
+        addDndMachineDst(card, cardDrop -> {
+            Stack<ActorMachineCard> stackMachine = new Stack<>();
+            stackMachine.add(cardDrop);
+            while (!stackMachine.isEmpty()) {
+                ActorMachineCard machine = stackMachine.pop();
+                stackMachine.addAll(machine.getCardChildren());
+                clearActorIngredientCard(machine);
+                machine.remove();
+            }
+            card.data.edges[0].setChildNode(null);
+        });
+    }
+
     private Consumer<ActorMachineCard> unlockShop(RootGridActor linkedShop) {
         return (newShopCard) -> {
             enableSimpleGrid(linkedShop);
@@ -226,7 +263,7 @@ public final class ContextWrk implements ContextUi {
         card.setParentActor(parent);
         context.stage.addActor(card);
 
-        addDndMachineSrc(card, Context.onlyEdgeTrigger(() -> tableau.findActorMachineNode(card.data) != null, () -> {
+        addDndMachineSrc(card, Context.onlyEdgeTrigger(() -> shop1.findActorMachineNode(card.data) == null && shop2.findActorMachineNode(card.data) == null, () -> {
             addDndMachineDst(card);
             addDndIngredientDst(card);
             addActorShopCard(machineNodeConstructor, parent);
@@ -268,6 +305,10 @@ public final class ContextWrk implements ContextUi {
     }
 
     private void addDndMachineDst(ActorMachineCard card) {
+        addDndMachineDst(card, null);
+    }
+
+    private void addDndMachineDst(ActorMachineCard card, Consumer<ActorMachineCard> drop) {
         for (int i = 0; i < card.edgeDropActor.length; i++) {
             Actor dropActor = card.edgeDropActor[i];
             int finalI = i;
@@ -293,6 +334,9 @@ public final class ContextWrk implements ContextUi {
                     dst.setParentActor(card, card.data.edges[finalI], dropActor);
                     updateAllGrid();
                     context.soundsManager.playCardDragDrop();
+                    if (drop != null) {
+                        drop.accept(dst);
+                    }
                 }
             });
         }
@@ -445,7 +489,10 @@ public final class ContextWrk implements ContextUi {
 
     @Override
     public void clearActorIngredientCard(MachineNode machineNode) {
-        ActorMachineCard actorMachineNode = findActorMachineNodeAnyWhere(machineNode);
+        clearActorIngredientCard(findActorMachineNodeAnyWhere(machineNode));
+    }
+
+    public void clearActorIngredientCard(ActorMachineCard actorMachineNode) {
         for (Actor ingredientActorCard : actorMachineNode.ingredientActorCards) {
             ingredientActorCard.remove();
         }
@@ -457,6 +504,7 @@ public final class ContextWrk implements ContextUi {
         foundation.updateActorSimple();
         shop1.updateActorSimple();
         shop2.updateActorSimple();
+        trash.updateActorSimple();
     }
 
     private void process() {

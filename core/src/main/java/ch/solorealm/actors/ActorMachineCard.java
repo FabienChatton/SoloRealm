@@ -210,28 +210,4 @@ public class ActorMachineCard extends Table implements GetCardChildren {
             icon.setColor(color);
         }
     }
-
-    public static final class Parameter {
-        public final Skin skin;
-        public final MachineNode data;
-        public final Texture iconTexture;
-        public final Texture backgroundTexture;
-        public final Texture arrowTexture;
-        public float fontScale;
-
-        public Parameter(Skin skin, MachineNode data, Texture iconTexture, Texture backgroundTexture,
-                         Texture arrowTexture) {
-            this.skin = skin;
-            this.data = data;
-            this.iconTexture = iconTexture;
-            this.backgroundTexture = backgroundTexture;
-            this.arrowTexture = arrowTexture;
-        }
-
-        public Parameter(Skin skin, MachineNode data, Texture iconTexture, Texture backgroundTexture,
-                         Texture arrowTexture, float fontScale) {
-            this(skin, data, iconTexture, backgroundTexture, arrowTexture);
-            this.fontScale = fontScale;
-        }
-    }
 }

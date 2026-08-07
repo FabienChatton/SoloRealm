@@ -47,6 +47,7 @@ public class Context implements Disposable {
         assetManager.load("cards/empty_root.png", Texture.class);
         assetManager.load("machines/Assembling_Machine.png", Texture.class);
         assetManager.load("machines/Alloy_Smelter.png", Texture.class);
+        assetManager.load("machines/Trash.png", Texture.class);
         assetManager.load("sounds/cloth2.mp3", Sound.class);
         assetManager.load("sounds/cloth3.mp3", Sound.class);
         assetManager.load("sounds/exp.mp3", Sound.class);
