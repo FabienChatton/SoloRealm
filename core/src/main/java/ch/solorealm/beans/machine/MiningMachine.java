@@ -7,14 +7,20 @@ import ch.solorealm.beans.ingredient.IngredientType;
 
 public class MiningMachine extends MachineNode {
     private final IngredientMaterial material;
+    private final IngredientType type;
     public MiningMachine(IngredientMaterial material) {
-        super(EdgeIOSettings.OUTPUT, new MachineProcessRecipe(new IngredientPair(IngredientType.ORE, material)));
+        this(material, IngredientType.ORE);
+    }
+
+    public MiningMachine(IngredientMaterial material, IngredientType type) {
+        super(EdgeIOSettings.OUTPUT, new MachineProcessRecipe(new IngredientPair(type, material)));
         this.material = material;
+        this.type = type;
     }
 
     @Override
     public String getAssetRecourcePath() {
-        return String.format("ingredients/%s_ore.png", material.toString().toLowerCase());
+        return String.format("ingredients/%s_%s.png", material.toString().toLowerCase(), type.toString().toLowerCase());
     }
 
     @Override

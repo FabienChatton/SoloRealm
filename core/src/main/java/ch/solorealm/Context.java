@@ -4,6 +4,7 @@ import ch.solorealm.beans.levels.LevelGenerator;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -35,30 +36,21 @@ public class Context implements Disposable {
     }
 
     public void loadAsset() {
-        assetManager.load("cards/empty_card.png", Texture.class);
-        assetManager.load("ingredients/copper_ingot.png", Texture.class);
-        assetManager.load("ingredients/copper_ore.png", Texture.class);
-        assetManager.load("ingredients/iron_ingot.png", Texture.class);
-        assetManager.load("ingredients/bronze_ingot.png", Texture.class);
-        assetManager.load("ingredients/tin_ingot.png", Texture.class);
-        assetManager.load("ingredients/tin_ore.png", Texture.class);
-        assetManager.load("machines/Furnace.png", Texture.class);
-        assetManager.load("machines/Grid_Overclocker_Upgrade.png", Texture.class);
-        assetManager.load("cards/empty_root.png", Texture.class);
-        assetManager.load("machines/Assembling_Machine.png", Texture.class);
-        assetManager.load("machines/Alloy_Smelter.png", Texture.class);
-        assetManager.load("machines/Trash.png", Texture.class);
-        assetManager.load("sounds/cloth2.mp3", Sound.class);
-        assetManager.load("sounds/cloth3.mp3", Sound.class);
-        assetManager.load("sounds/exp.mp3", Sound.class);
-        assetManager.load("sounds/stone1.mp3", Sound.class);
-        assetManager.load("sounds/stone2.mp3", Sound.class);
-        assetManager.load("sounds/exp-multi.mp3", Sound.class);
-        assetManager.load("sounds/mm_join.wav", Sound.class);
-        assetManager.load("sounds/menu_focus.wav", Sound.class);
-        assetManager.load("sounds/achievement_earned.wav", Sound.class);
-        assetManager.load("bg/bg.jpg", Texture.class);
-        assetManager.load("bg/Chapiter_1.png", Texture.class);
+        for (FileHandle fileHandle : Gdx.files.internal("assets/ingredients").list()) {
+            assetManager.load("ingredients/" + fileHandle.name(), Texture.class);
+        }
+        for (FileHandle fileHandle : Gdx.files.internal("assets/machines").list()) {
+            assetManager.load("machines/" + fileHandle.name(), Texture.class);
+        }
+        for (FileHandle fileHandle : Gdx.files.internal("assets/sounds").list()) {
+            assetManager.load("sounds/" + fileHandle.name(), Sound.class);
+        }
+        for (FileHandle fileHandle : Gdx.files.internal("assets/cards").list()) {
+            assetManager.load("cards/" + fileHandle.name(), Texture.class);
+        }
+        for (FileHandle fileHandle : Gdx.files.internal("assets/bg").list()) {
+            assetManager.load("bg/" + fileHandle.name(), Texture.class);
+        }
         assetManager.finishLoading();
 
     }

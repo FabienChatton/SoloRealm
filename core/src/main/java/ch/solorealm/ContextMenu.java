@@ -1,6 +1,7 @@
 package ch.solorealm;
 
 import ch.solorealm.beans.levels.Level1;
+import ch.solorealm.beans.levels.Level2;
 import ch.solorealm.beans.levels.LevelGenerator;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -61,7 +62,8 @@ public class ContextMenu {
         chapterPanel.add(divider).fillX().height(1).padBottom(20).row();
         chapterPanel.padLeft(20).padRight(20).padBottom(20);
 
-        chapterPanel.add(createLevelRow("Test Level", new Level1())).row();
+        chapterPanel.add(createLevelRow("Level 1", new Level1())).row();
+        chapterPanel.add(createLevelRow("Level 2", new Level2())).row();
         return chapterPanel;
     }
 
