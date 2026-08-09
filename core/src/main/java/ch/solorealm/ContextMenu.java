@@ -62,15 +62,15 @@ public class ContextMenu {
         chapterPanel.add(divider).fillX().height(1).padBottom(20).row();
         chapterPanel.padLeft(20).padRight(20).padBottom(20);
 
-        chapterPanel.add(createLevelRow("Level 1", new Level1())).row();
-        chapterPanel.add(createLevelRow("Level 2", new Level2())).row();
+        chapterPanel.add(createLevelRow(new Level1())).row();
+        chapterPanel.add(createLevelRow(new Level2())).row();
         return chapterPanel;
     }
 
-    private Table createLevelRow(String title, LevelGenerator levelGenerator) {
+    private Table createLevelRow(LevelGenerator levelGenerator) {
         Table row = new Table();
-        Image icon = new Image(context.assetManager.get("machines/Assembling_Machine.png", Texture.class));
-        Label label = new Label(title, context.skin, "window");
+        Image icon = new Image(context.assetManager.get(levelGenerator.iconTexture, Texture.class));
+        Label label = new Label(levelGenerator.title, context.skin, "window");
 
         Image divider = getDivider();
 

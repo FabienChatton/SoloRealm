@@ -23,7 +23,7 @@ public class FoundationNode extends MachineNode {
     @Override
     public String getMachineDisplayName() {
         return String.format("%s %s",
-            ContextWrk.upperFirstLetter(ingredientMaterial.toString()),
+            ContextWrk.upperFirstLetter(ingredientMaterial.toString().replace('_', ' ')),
             ContextWrk.upperFirstLetter(ingredientType.toString()));
     }
 }

@@ -9,7 +9,7 @@ import ch.solorealm.beans.machine.MiningMachine;
 
 public class Level1 extends LevelGenerator {
     public Level1() {
-        super(new TableauNode[]{
+        super("Level 1", "ingredients/bronze_ingot.png", new TableauNode[]{
             new TableauNode(new MiningMachine(IngredientMaterial.COPPER), 0),
             new TableauNode(new MiningMachine(IngredientMaterial.TIN), 1)
         }, new FoundationNode[]{

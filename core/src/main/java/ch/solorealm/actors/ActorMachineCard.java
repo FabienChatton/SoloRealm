@@ -92,7 +92,7 @@ public class ActorMachineCard extends Table implements GetCardChildren {
         machineNameLabel.setColor(Color.BLACK);
         machineNameLabel.setFontScale(SCALE_FACTOR);
         String displayName = data.getMachineDisplayName();
-        if (displayName.length() >= 10 * data.edges.length) {
+        if (displayName.length() >= 8 * data.edges.length) {
             machineNameLabel.setFontScale(12f / ((float) displayName.length() / data.edges.length));
         }
 

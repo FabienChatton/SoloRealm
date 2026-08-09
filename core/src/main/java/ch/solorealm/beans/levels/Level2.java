@@ -6,7 +6,7 @@ import ch.solorealm.beans.machine.*;
 
 public class Level2 extends LevelGenerator {
     public Level2() {
-        super(new TableauNode[]{
+        super("Level 2", "machines/Coke_Oven.png", new TableauNode[]{
             new TableauNode(new MiningMachine(IngredientMaterial.SAND, IngredientType.RAW), 0),
             new TableauNode(new MiningMachine(IngredientMaterial.CLAY, IngredientType.RAW), 1),
             new TableauNode(new CraftingTableMachine(), 2)

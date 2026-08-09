@@ -13,9 +13,14 @@ import ch.solorealm.beans.machine.FoundationNode;
 import ch.solorealm.beans.machine.MachineEdge;
 import ch.solorealm.beans.machine.MachineNode;
 import ch.solorealm.beans.machine.TrashMachine;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputAdapter;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
@@ -55,6 +60,8 @@ public final class ContextWrk implements ContextUi {
 
     public void createGrid(LevelGenerator levelGenerator) {
         context.stage.getActors().clear();
+        InputMultiplexer inputMultiplexer = getInputMultiplexer();
+        Gdx.input.setInputProcessor(inputMultiplexer);
 
         tableau = new RootGridActor(new RootGrid(6), context.skin, context.assetManager.get("cards/empty_root.png"));
         rootGridActors.add(tableau);
@@ -183,14 +190,35 @@ public final class ContextWrk implements ContextUi {
         updateAllGrid();
     }
 
+    private InputMultiplexer getInputMultiplexer() {
+        InputAdapter inputAdapter = new InputAdapter() {
+            @Override
+            public boolean keyDown(int keycode) {
+                if (keycode == Input.Keys.ESCAPE) {
+                    context.stage.addAction(Actions.sequence(fadeToMenu()));
+                    Gdx.input.setInputProcessor(context.stage);
+                    return true;
+                }
+                return false;
+            }
+        };
+        InputMultiplexer inputMultiplexer = new InputMultiplexer(inputAdapter, context.stage);
+        return inputMultiplexer;
+    }
+
     private Consumer<ActorMachineCard> endLevel() {
         return (card) -> context.stage.addAction(Actions.sequence(
             Actions.run(context.soundsManager::playEndLevel),
+            fadeToMenu()));
+    }
+
+    private Action fadeToMenu() {
+        return Actions.sequence(
             context.contextMenu.fadeTransition(true, false),
             Actions.parallel(
                 Actions.run(context.contextMenu::createMenu),
                 context.contextMenu.fadeTransition(false, true)
-            )));
+            ));
     }
 
     public void addActorMachineCard(MachineNode data, RootActor parent) {
