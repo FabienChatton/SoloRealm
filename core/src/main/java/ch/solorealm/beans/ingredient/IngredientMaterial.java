@@ -10,7 +10,11 @@ public enum IngredientMaterial {
     CLAY,
     WOOD,
     CHARCOAL,
-    COKE_OVEN_BRICK
+    COKE_OVEN_BRICK,
+    COAL_COKE,
+    BRICK,
+    COAL,
+    FIREBRICK,
     ;
 
     public boolean isCompatible(IngredientMaterial inputMaterial) {

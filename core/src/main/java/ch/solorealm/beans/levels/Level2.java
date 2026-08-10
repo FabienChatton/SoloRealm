@@ -13,10 +13,11 @@ public class Level2 extends LevelGenerator {
         }, new FoundationNode[] {
             new FoundationNode(IngredientType.ORE, IngredientMaterial.COKE_OVEN_BRICK),
             new FoundationNode(IngredientType.INGOT, IngredientMaterial.COKE_OVEN_BRICK),
-            new FoundationNode(IngredientType.RAW, IngredientMaterial.CHARCOAL)
+            new FoundationNode(IngredientType.RAW, IngredientMaterial.COAL_COKE)
         }, new ShopNode[]{
             new ShopNode(FurnaceMachine::new, 0),
-            new ShopNode(CokeOvenMachine::new, 1), new ShopNode(() -> new MiningMachine(IngredientMaterial.WOOD, IngredientType.RAW), 1)
+            new ShopNode(CokeOvenMachine::new, 1),
+            new ShopNode(() -> new MiningMachine(IngredientMaterial.COAL, IngredientType.ORE), 1)
         });
     }
 }
