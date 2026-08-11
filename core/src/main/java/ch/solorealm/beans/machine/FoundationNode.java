@@ -10,7 +10,7 @@ public class FoundationNode extends MachineNode {
     public final IngredientMaterial ingredientMaterial;
 
     public FoundationNode(IngredientType ingredientType, IngredientMaterial ingredientMaterial) {
-        super(EdgeIOSettings.INPUT, new MachineProcessRecipe(null, new IngredientPair(ingredientType, ingredientMaterial)));
+        super(EdgeIOSettings.INPUT, null, new IngredientPair(ingredientMaterial, ingredientType));
         this.ingredientType = ingredientType;
         this.ingredientMaterial = ingredientMaterial;
     }

@@ -8,11 +8,11 @@ public class CokeOvenMachine extends MachineNode {
     public CokeOvenMachine() {
         super(EdgeIOSettings.INPUT_OUTPUT,
             new MachineProcessRecipe(
-                new IngredientPair(IngredientType.RAW, IngredientMaterial.CHARCOAL),
-                new IngredientPair(IngredientType.RAW, IngredientMaterial.WOOD)),
+                new IngredientPair(IngredientMaterial.CHARCOAL, IngredientType.RAW),
+                new IngredientPair(IngredientMaterial.WOOD, IngredientType.RAW)),
             new MachineProcessRecipe(
-                new IngredientPair(IngredientType.RAW, IngredientMaterial.COAL_COKE),
-                new IngredientPair(IngredientType.INGOT, IngredientMaterial.COAL))
+                new IngredientPair(IngredientMaterial.COAL_COKE, IngredientType.RAW),
+                new IngredientPair(IngredientMaterial.COAL, IngredientType.INGOT))
         );
     }
 

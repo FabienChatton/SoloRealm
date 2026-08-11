@@ -13,7 +13,7 @@ public class MiningMachine extends MachineNode {
     }
 
     public MiningMachine(IngredientMaterial material, IngredientType type) {
-        super(EdgeIOSettings.OUTPUT, new MachineProcessRecipe(new IngredientPair(type, material)));
+        super(EdgeIOSettings.OUTPUT, new IngredientPair(material, type));
         this.material = material;
         this.type = type;
     }

@@ -6,18 +6,17 @@ import ch.solorealm.actors.RootGridActor;
 import ch.solorealm.beans.ContextUi;
 import ch.solorealm.beans.RootGrid;
 import ch.solorealm.beans.ingredient.IngredientCard;
+import ch.solorealm.beans.ingredient.IngredientPair;
 import ch.solorealm.beans.levels.LevelGenerator;
 import ch.solorealm.beans.levels.ShopNode;
 import ch.solorealm.beans.levels.TableauNode;
-import ch.solorealm.beans.machine.FoundationNode;
-import ch.solorealm.beans.machine.MachineEdge;
-import ch.solorealm.beans.machine.MachineNode;
-import ch.solorealm.beans.machine.TrashMachine;
+import ch.solorealm.beans.machine.*;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Action;
@@ -28,6 +27,8 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
 import com.badlogic.gdx.scenes.scene2d.actions.ScaleToAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
@@ -47,6 +48,7 @@ public final class ContextWrk implements ContextUi {
     private RootGridActor shop2;
     private final Set<RootGridActor> rootGridActors;
     private RootGridActor trash;
+    private Table helpWindow;
 
     public ContextWrk(Context context) {
         this.context = context;
@@ -201,9 +203,69 @@ public final class ContextWrk implements ContextUi {
                 }
                 return false;
             }
+
+            @Override
+            public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+                // left click
+                if (button == 1) {
+                    Vector2 coords = new Vector2(screenX, screenY);
+                    context.stage.screenToStageCoordinates(coords);
+                    Actor hit = context.stage.hit(coords.x, coords.y, true);
+                    if (hit.getParent() instanceof ActorMachineCard card) {
+                        StringBuilder sb = new StringBuilder();
+                        for (MachineProcessRecipe machineProcessRecipe : card.data.machineProcessRecipes) {
+                            for (IngredientPair ingredientPair : machineProcessRecipe.input()) {
+                                sb.append(ingredientPair);
+                            }
+                            sb.append(" -> ");
+                            sb.append(machineProcessRecipe.output());
+                            sb.append('\n');
+                        }
+                        sb.deleteCharAt(sb.length() - 1);
+                        addHelpWindow(sb.toString(), coords);
+                    } else if (hit instanceof Image img) {
+                        if (img.getUserObject() instanceof IngredientCard card) {
+                            addHelpWindow(IngredientPair.formatString(card), coords);
+                        }
+                    }
+                }
+                return false;
+            }
+
+            private void addHelpWindow(String card, Vector2 stageCoords) {
+                helpWindow = new Table(context.skin);
+                helpWindow.add(new Label(card, context.skin));
+                helpWindow.setPosition(stageCoords.x, stageCoords.y);
+
+                setBlackFadeBackground(helpWindow);
+                helpWindow.pad(10f);
+
+                helpWindow.pack();
+                context.stage.addActor(helpWindow);
+            }
+
+            @Override
+            public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+                if (button == 1) {
+                    if (helpWindow != null) {
+                        helpWindow.remove();
+                    }
+                    return true;
+                }
+                return false;
+            }
         };
-        InputMultiplexer inputMultiplexer = new InputMultiplexer(inputAdapter, context.stage);
-        return inputMultiplexer;
+        return new InputMultiplexer(inputAdapter, context.stage);
+    }
+
+    static void setBlackFadeBackground(Table table) {
+        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pixmap.setColor(new Color(0, 0,0, 0.85f));
+        pixmap.fill();
+
+        TextureRegionDrawable backgroundDrawable = new TextureRegionDrawable(new Texture(pixmap));
+        pixmap.dispose();
+        table.setBackground(backgroundDrawable);
     }
 
     private Consumer<ActorMachineCard> endLevel() {

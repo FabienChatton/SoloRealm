@@ -1,16 +1,24 @@
 package ch.solorealm.beans.ingredient;
 
-public record IngredientPair(IngredientType type, IngredientMaterial material) {
+public record IngredientPair(IngredientMaterial material, IngredientType type) {
     @Override
     public String toString() {
-        return String.format("%s %s", type, material);
+        return formatString(material, type);
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof IngredientPair(IngredientType type1, IngredientMaterial material1)) {
+        if (obj instanceof IngredientPair(IngredientMaterial material1, IngredientType type1)) {
             return type1 == type && material1 == material;
         }
         return false;
+    }
+
+    public static String formatString(IngredientMaterial material, IngredientType type) {
+        return String.format("%s %s", material, type);
+    }
+
+    public static String formatString(IngredientCard card) {
+        return formatString(card.ingredientMaterial, card.ingredientType);
     }
 }

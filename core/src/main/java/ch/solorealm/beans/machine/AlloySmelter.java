@@ -8,8 +8,8 @@ public class AlloySmelter extends MachineNode {
 
     public AlloySmelter() {
         super(new EdgeIOSettings[]{EdgeIOSettings.INPUT_OUTPUT, EdgeIOSettings.INPUT},
-            new MachineProcessRecipe(new IngredientPair(IngredientType.INGOT, IngredientMaterial.BRONZE),
-                new IngredientPair(IngredientType.INGOT, IngredientMaterial.TIN), new IngredientPair(IngredientType.INGOT, IngredientMaterial.COPPER)));
+            new MachineProcessRecipe(new IngredientPair(IngredientMaterial.BRONZE, IngredientType.INGOT),
+                new IngredientPair(IngredientMaterial.TIN, IngredientType.INGOT), new IngredientPair(IngredientMaterial.COPPER, IngredientType.INGOT)));
     }
 
     @Override

@@ -45,13 +45,7 @@ public class ContextMenu {
     private Table createChapterPanel() {
         Table chapterPanel = new Table();
 
-        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-        pixmap.setColor(new Color(0, 0,0, 0.85f));
-        pixmap.fill();
-
-        TextureRegionDrawable backgroundDrawable = new TextureRegionDrawable(new Texture(pixmap));
-        pixmap.dispose();
-        chapterPanel.setBackground(backgroundDrawable);
+        ContextWrk.setBlackFadeBackground(chapterPanel);
 
         Label titleLabel = new Label("TIER I", context.skin, "window");
         Label subtitleLabel = new Label("And so, it Begins", context.skin, "window");

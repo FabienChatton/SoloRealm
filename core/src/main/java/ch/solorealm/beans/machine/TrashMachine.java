@@ -6,7 +6,7 @@ import ch.solorealm.beans.ingredient.IngredientType;
 
 public class TrashMachine extends MachineNode {
     public TrashMachine() {
-        super(EdgeIOSettings.INPUT, null, new IngredientPair(IngredientType.ANY, IngredientMaterial.ANY));
+        super(EdgeIOSettings.INPUT, null, new IngredientPair(IngredientMaterial.ANY, IngredientType.ANY));
     }
 
     @Override

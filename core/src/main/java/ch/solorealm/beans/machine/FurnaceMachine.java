@@ -8,11 +8,11 @@ public class FurnaceMachine extends MachineNode {
     public FurnaceMachine() {
         super(EdgeIOSettings.INPUT_OUTPUT,
             new MachineProcessRecipe(
-                new IngredientPair(IngredientType.INGOT, IngredientMaterial.ANY),
-                new IngredientPair(IngredientType.ORE, IngredientMaterial.ANY)),
+                new IngredientPair(IngredientMaterial.ANY, IngredientType.INGOT),
+                new IngredientPair(IngredientMaterial.ANY, IngredientType.ORE)),
             new MachineProcessRecipe(
-                new IngredientPair(IngredientType.INGOT, IngredientMaterial.BRICK),
-                new IngredientPair(IngredientType.RAW, IngredientMaterial.CLAY)
+                new IngredientPair(IngredientMaterial.BRICK, IngredientType.INGOT),
+                new IngredientPair(IngredientMaterial.CLAY, IngredientType.RAW)
             ));
     }
 
