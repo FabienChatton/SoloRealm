@@ -16,8 +16,12 @@ public class IngredientCard implements GetAssetResource {
     }
 
     @Override
-    public String getAssetRecourcePath() {
-        return String.format("ingredients/%s_%s.png", ingredientMaterial.toString(), ingredientType.toString()).toLowerCase();
+    public String getAssetResourcePath() {
+        return getAssetResourcePath(ingredientMaterial, ingredientType);
+    }
+
+    public static String getAssetResourcePath(IngredientMaterial material, IngredientType type) {
+        return String.format("ingredients/%s_%s.png", material, type).toLowerCase();
     }
 
 }

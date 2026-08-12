@@ -17,7 +17,7 @@ public class CokeOvenMachine extends MachineNode {
     }
 
     @Override
-    public String getAssetRecourcePath() {
+    public String getAssetResourcePath() {
         return "machines/Coke_Oven.png";
     }
 

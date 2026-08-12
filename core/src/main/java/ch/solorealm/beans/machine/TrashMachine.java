@@ -10,7 +10,7 @@ public class TrashMachine extends MachineNode {
     }
 
     @Override
-    public String getAssetRecourcePath() {
+    public String getAssetResourcePath() {
         return "machines/Trash.png";
     }
 

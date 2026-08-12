@@ -162,7 +162,7 @@ public abstract class MachineNode implements GetAssetResource {
     public abstract String getMachineDisplayName();
 
     @Override
-    public String getAssetRecourcePath() {
+    public String getAssetResourcePath() {
         return String.format("machines/%s.png", getMachineDisplayName());
     }
 

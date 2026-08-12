@@ -22,7 +22,7 @@ public class CraftingTableMachine extends MachineNode {
     }
 
     @Override
-    public String getAssetRecourcePath() {
+    public String getAssetResourcePath() {
         return "machines/Crafting_Table.png";
     }
 

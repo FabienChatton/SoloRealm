@@ -16,14 +16,18 @@ public class FoundationNode extends MachineNode {
     }
 
     @Override
-    public String getAssetRecourcePath() {
+    public String getAssetResourcePath() {
         return String.format("ingredients/%s_%s.png", ingredientMaterial, ingredientType).toLowerCase();
     }
 
     @Override
     public String getMachineDisplayName() {
+        return getMachineDisplayName(ingredientMaterial, ingredientType);
+    }
+
+    public static String getMachineDisplayName(IngredientMaterial material, IngredientType type) {
         return String.format("%s %s",
-            ContextWrk.upperFirstLetter(ingredientMaterial.toString().replace('_', ' ')),
-            ContextWrk.upperFirstLetter(ingredientType.toString()));
+            ContextWrk.upperFirstLetter(material.toString().replace('_', ' ')),
+            ContextWrk.upperFirstLetter(type.toString()));
     }
 }

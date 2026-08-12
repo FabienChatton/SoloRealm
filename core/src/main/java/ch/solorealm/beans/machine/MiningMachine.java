@@ -19,7 +19,7 @@ public class MiningMachine extends MachineNode {
     }
 
     @Override
-    public String getAssetRecourcePath() {
+    public String getAssetResourcePath() {
         return String.format("ingredients/%s_%s.png", material.toString().toLowerCase(), type.toString().toLowerCase());
     }
 
