@@ -8,6 +8,7 @@ import ch.solorealm.beans.RootGrid;
 import ch.solorealm.beans.ingredient.IngredientCard;
 import ch.solorealm.beans.ingredient.IngredientPair;
 import ch.solorealm.beans.levels.LevelGenerator;
+import ch.solorealm.beans.levels.LevelStat;
 import ch.solorealm.beans.levels.ShopNode;
 import ch.solorealm.beans.levels.TableauNode;
 import ch.solorealm.beans.machine.*;
@@ -51,6 +52,7 @@ public final class ContextWrk implements ContextUi {
     private final Set<RootGridActor> rootGridActors;
     private RootGridActor trash;
     private Table helpWindow;
+    private LevelStat levelStat;
 
     public ContextWrk(Context context) {
         this.context = context;
@@ -94,6 +96,7 @@ public final class ContextWrk implements ContextUi {
                     machineCard.setParentActor(rootActor);
                     updateAllGrid();
                     context.soundsManager.playCardDragDrop();
+                    levelStat.nbrMovePlus1();
                 }
             });
         }
@@ -148,6 +151,28 @@ public final class ContextWrk implements ContextUi {
         context.stage.addActor(bgImage);
         bgImage.toBack();
 
+        Label nbrMoveLabel = new Label(null, context.skin, "window");
+        Label nbrProcessLabel = new Label(null, context.skin, "window");
+        Label nbrCardLabel = new Label(null, context.skin, "window");
+        Table statTable = new Table();
+        statTable.add(new Label("Moves:", context.skin, "window")).left();
+        statTable.add(nbrMoveLabel).padLeft(20).row();
+        statTable.add(new Label("Process:", context.skin, "window")).left();
+        statTable.add(nbrProcessLabel).padLeft(20).row();
+        statTable.add(new Label("Cards:", context.skin, "window")).left();
+        statTable.add(nbrCardLabel).padLeft(20).row();
+        statTable.setPosition(900, 50);
+        statTable.pad(15);
+        Pixmap levelStatBgColor = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        levelStatBgColor.setColor(0.098f, 0.098f, 0.098f, 1);
+        levelStatBgColor.fill();
+        TextureRegionDrawable levelStatBg = new TextureRegionDrawable(new Texture(levelStatBgColor));
+        levelStatBgColor.dispose();
+        statTable.setBackground(levelStatBg);
+        statTable.pack();
+
+        context.stage.addActor(statTable);
+        levelStat = new LevelStat(nbrMoveLabel, nbrProcessLabel, nbrCardLabel);
 
         for (TableauNode initialTableau : levelGenerator.initialTableau) {
             addActorMachineCard(initialTableau.machineNode(), tableau.rootActors[initialTableau.index()]);
@@ -350,6 +375,8 @@ public final class ContextWrk implements ContextUi {
         addDndMachineSrc(card);
         addDndMachineDst(card);
         addDndIngredientDst(card);
+
+        levelStat.nbrCardPlus1();
     }
 
     public void addActorFoundationCard(MachineNode data, RootGridActor foundation, int index, Consumer<ActorMachineCard> onValidatedFondation) {
@@ -437,6 +464,7 @@ public final class ContextWrk implements ContextUi {
                         IngredientCard ingredientCard = (IngredientCard) payload.getObject();
                         moveActorIngredientCard(ingredientCard, ingredientCard.edgeAttached, machineEdge, inputSlot);
                         context.soundsManager.playIngredientDragDrop();
+                        levelStat.nbrMovePlus1();
                         if (drop != null) {
                             drop.accept(card);
                         }
@@ -480,6 +508,7 @@ public final class ContextWrk implements ContextUi {
                     dst.setParentActor(card, card.data.edges[finalI], dropActor);
                     updateAllGrid();
                     context.soundsManager.playCardDragDrop();
+                    levelStat.nbrMovePlus1();
                     if (drop != null) {
                         drop.accept(dst);
                     }
@@ -656,6 +685,7 @@ public final class ContextWrk implements ContextUi {
     private void process() {
         tableau.data.process(this);
         context.soundsManager.playProcess();
+        levelStat.nbrProcessPlus1();
     }
 
     private Set<ActorMachineCard> getAllActorMachineNodeAnyWhere() {
