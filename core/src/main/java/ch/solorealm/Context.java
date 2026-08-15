@@ -36,23 +36,21 @@ public class Context implements Disposable {
     }
 
     public void loadAsset() {
-        for (FileHandle fileHandle : Gdx.files.internal("assets/ingredients").list()) {
-            assetManager.load("ingredients/" + fileHandle.name(), Texture.class);
-        }
-        for (FileHandle fileHandle : Gdx.files.internal("assets/machines").list()) {
-            assetManager.load("machines/" + fileHandle.name(), Texture.class);
-        }
-        for (FileHandle fileHandle : Gdx.files.internal("assets/sounds").list()) {
-            assetManager.load("sounds/" + fileHandle.name(), Sound.class);
-        }
-        for (FileHandle fileHandle : Gdx.files.internal("assets/cards").list()) {
-            assetManager.load("cards/" + fileHandle.name(), Texture.class);
-        }
-        for (FileHandle fileHandle : Gdx.files.internal("assets/bg").list()) {
-            assetManager.load("bg/" + fileHandle.name(), Texture.class);
+        FileHandle assets = Gdx.files.internal("assets.txt");
+        for (String assetPath : assets.readString().split("\n")) {
+            if (assetPath.startsWith("ui")) {
+                continue;
+            }
+
+            Class<?> fileType;
+            if (assetPath.startsWith("sounds")) {
+                fileType = Sound.class;
+            } else {
+                fileType = Texture.class;
+            }
+            assetManager.load(assetPath, fileType);
         }
         assetManager.finishLoading();
-
     }
 
     public void setLevel(LevelGenerator levelGenerator) {
