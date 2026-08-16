@@ -131,6 +131,15 @@ public class ContextMenu {
         return sequence;
     }
 
+    public Action fadeToMenu() {
+        return Actions.sequence(
+            context.contextMenu.fadeTransition(true, false),
+            Actions.parallel(
+                Actions.run(context.contextMenu::createMenu),
+                context.contextMenu.fadeTransition(false, true)
+            ));
+    }
+
     private static Image getDivider() {
         Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
         pixmap.setColor(Color.GRAY);

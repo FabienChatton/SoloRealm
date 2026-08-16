@@ -21,7 +21,6 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
@@ -53,6 +52,8 @@ public final class ContextWrk implements ContextUi {
     private RootGridActor trash;
     private Table helpWindow;
     private LevelStat levelStat;
+    private ContextLevelEnd contextLevelEnd;
+    private boolean recordScreenshot;
 
     public ContextWrk(Context context) {
         this.context = context;
@@ -97,6 +98,7 @@ public final class ContextWrk implements ContextUi {
                     updateAllGrid();
                     context.soundsManager.playCardDragDrop();
                     levelStat.nbrMovePlus1();
+                    takeScreenShot();
                 }
             });
         }
@@ -151,28 +153,11 @@ public final class ContextWrk implements ContextUi {
         context.stage.addActor(bgImage);
         bgImage.toBack();
 
-        Label nbrMoveLabel = new Label(null, context.skin, "window");
-        Label nbrProcessLabel = new Label(null, context.skin, "window");
-        Label nbrCardLabel = new Label(null, context.skin, "window");
-        Table statTable = new Table();
-        statTable.add(new Label("Moves:", context.skin, "window")).left();
-        statTable.add(nbrMoveLabel).padLeft(20).row();
-        statTable.add(new Label("Process:", context.skin, "window")).left();
-        statTable.add(nbrProcessLabel).padLeft(20).row();
-        statTable.add(new Label("Cards:", context.skin, "window")).left();
-        statTable.add(nbrCardLabel).padLeft(20).row();
-        statTable.setPosition(900, 50);
-        statTable.pad(15);
-        Pixmap levelStatBgColor = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-        levelStatBgColor.setColor(0.098f, 0.098f, 0.098f, 1);
-        levelStatBgColor.fill();
-        TextureRegionDrawable levelStatBg = new TextureRegionDrawable(new Texture(levelStatBgColor));
-        levelStatBgColor.dispose();
-        statTable.setBackground(levelStatBg);
-        statTable.pack();
+        contextLevelEnd = new ContextLevelEnd(context, levelGenerator.getClass().getSimpleName());
+        Table statTable = contextLevelEnd.createStatTable();
 
         context.stage.addActor(statTable);
-        levelStat = new LevelStat(nbrMoveLabel, nbrProcessLabel, nbrCardLabel);
+        levelStat = contextLevelEnd.getLevelStat();
 
         for (TableauNode initialTableau : levelGenerator.initialTableau) {
             addActorMachineCard(initialTableau.machineNode(), tableau.rootActors[initialTableau.index()]);
@@ -214,6 +199,8 @@ public final class ContextWrk implements ContextUi {
             widthI += card.data.edges.length;
         }
 
+        recordScreenshot = true;
+
         disableSimpleGrid(shop1);
         disableSimpleGrid(shop2);
         updateAllGrid();
@@ -224,7 +211,8 @@ public final class ContextWrk implements ContextUi {
             @Override
             public boolean keyDown(int keycode) {
                 if (keycode == Input.Keys.ESCAPE) {
-                    context.stage.addAction(Actions.sequence(fadeToMenu()));
+                    levelStat.dispose();
+                    context.stage.addAction(Actions.sequence(context.contextMenu.fadeToMenu()));
                     Gdx.input.setInputProcessor(context.stage);
                     return true;
                 }
@@ -352,16 +340,12 @@ public final class ContextWrk implements ContextUi {
     private Consumer<ActorMachineCard> endLevel() {
         return (card) -> context.stage.addAction(Actions.sequence(
             Actions.run(context.soundsManager::playEndLevel),
-            fadeToMenu()));
-    }
-
-    private Action fadeToMenu() {
-        return Actions.sequence(
             context.contextMenu.fadeTransition(true, false),
             Actions.parallel(
-                Actions.run(context.contextMenu::createMenu),
+                Actions.run(() -> contextLevelEnd.setLevelEnd()),
                 context.contextMenu.fadeTransition(false, true)
-            ));
+            )
+        ));
     }
 
     public void addActorMachineCard(MachineNode data, RootActor parent) {
@@ -377,6 +361,7 @@ public final class ContextWrk implements ContextUi {
         addDndIngredientDst(card);
 
         levelStat.nbrCardPlus1();
+        takeScreenShot();
     }
 
     public void addActorFoundationCard(MachineNode data, RootGridActor foundation, int index, Consumer<ActorMachineCard> onValidatedFondation) {
@@ -465,6 +450,7 @@ public final class ContextWrk implements ContextUi {
                         moveActorIngredientCard(ingredientCard, ingredientCard.edgeAttached, machineEdge, inputSlot);
                         context.soundsManager.playIngredientDragDrop();
                         levelStat.nbrMovePlus1();
+                        takeScreenShot();
                         if (drop != null) {
                             drop.accept(card);
                         }
@@ -509,6 +495,7 @@ public final class ContextWrk implements ContextUi {
                     updateAllGrid();
                     context.soundsManager.playCardDragDrop();
                     levelStat.nbrMovePlus1();
+                    takeScreenShot();
                     if (drop != null) {
                         drop.accept(dst);
                     }
@@ -686,6 +673,14 @@ public final class ContextWrk implements ContextUi {
         tableau.data.process(this);
         context.soundsManager.playProcess();
         levelStat.nbrProcessPlus1();
+        takeScreenShot();
+    }
+
+    private void takeScreenShot() {
+        if (recordScreenshot) {
+            Pixmap pixmap = Pixmap.createFromFrameBuffer(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+            levelStat.addProcessScreenShot(pixmap);
+        }
     }
 
     private Set<ActorMachineCard> getAllActorMachineNodeAnyWhere() {
