@@ -91,6 +91,14 @@ By pressing 'Esc' key, the level can be exited.
 On the left of the menu screen is a list of levels.
 When a level is clicked, the level is loaded and ready to be played.
 
+### Stat Screen
+![statScreen.png](images/statScreen.png)
+
+After completing a level, the stat screen will show the game step by step with the Save to gif button.
+This gif can be saved into the download folder.
+The final stat Tableau is show.
+The Go to Menu is available. 
+
 # Building the project
 
 SoloRealm require Java 21. SoloRealm uses Gradle. Gradle tasks used gradlew.bat or ./gradlew commands.
