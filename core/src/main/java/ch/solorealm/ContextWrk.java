@@ -426,6 +426,7 @@ public final class ContextWrk implements ContextUi {
             addDndIngredientDst(card);
             addActorShopCard(machineNodeConstructor, parent);
             updateAllGrid();
+            levelStat.nbrCardPlus1();
         }));
         return card;
     }
