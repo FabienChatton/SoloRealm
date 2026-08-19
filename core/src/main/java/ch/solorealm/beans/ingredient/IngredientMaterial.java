@@ -15,6 +15,7 @@ public enum IngredientMaterial {
     BRICK,
     COAL,
     FIREBRICK,
+    STEEL,
     ;
 
     public boolean isCompatible(IngredientMaterial inputMaterial) {
