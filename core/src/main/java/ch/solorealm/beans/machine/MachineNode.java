@@ -145,16 +145,19 @@ public abstract class MachineNode implements GetAssetResource {
     private Set<IngredientPair> getRemainingIngredient(List<MachineProcessRecipe> availableProcessRecipe) {
         Set<IngredientPair> ret = new HashSet<>();
         for (MachineProcessRecipe machineProcessRecipe : availableProcessRecipe) {
-            ret.addAll(List.of(machineProcessRecipe.input()));
-            for (IngredientPair ingredientPair : machineProcessRecipe.input()) {
-                for (MachineEdge edge : edges) {
+            List<IngredientPair> tmp = new ArrayList<>(List.of(machineProcessRecipe.input()));
+            edges:
+            for (MachineEdge edge : edges) {
+                for (IngredientPair ingredientPair : machineProcessRecipe.input()) {
                     if (edge.input != null) {
                         if (ingredientPair.type().isCompatible(edge.input.ingredientType) && ingredientPair.material().isCompatible(edge.input.ingredientMaterial)) {
-                            ret.remove(ingredientPair);
+                            tmp.remove(ingredientPair);
+                            continue edges;
                         }
                     }
                 }
             }
+            ret.addAll(tmp);
         }
         return ret;
     }
