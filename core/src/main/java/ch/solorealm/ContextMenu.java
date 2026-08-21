@@ -58,6 +58,7 @@ public class ContextMenu {
         chapterPanel.add(createLevelRow(new Level2())).row();
         chapterPanel.add(createLevelRow(new Level3())).row();
         chapterPanel.add(createLevelRow(new Level4())).row();
+        chapterPanel.add(createLevelRow(new Level5())).row();
 
         return chapterPanel;
     }

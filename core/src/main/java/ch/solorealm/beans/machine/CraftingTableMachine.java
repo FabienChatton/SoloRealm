@@ -17,6 +17,24 @@ public class CraftingTableMachine extends MachineNode {
 
                 new IngredientPair(IngredientMaterial.BRICK, IngredientType.INGOT),
                 new IngredientPair(IngredientMaterial.CLAY, IngredientType.RAW)
+            ),
+            new MachineProcessRecipe(
+                new IngredientPair(IngredientMaterial.COPPER, IngredientType.WIRE),
+
+                new IngredientPair(IngredientMaterial.COPPER, IngredientType.INGOT),
+                new IngredientPair(IngredientMaterial.COPPER, IngredientType.INGOT)
+            ),
+            new MachineProcessRecipe(
+                new IngredientPair(IngredientMaterial.RUBBER, IngredientType.PLATE),
+
+                new IngredientPair(IngredientMaterial.RUBBER, IngredientType.INGOT),
+                new IngredientPair(IngredientMaterial.RUBBER, IngredientType.INGOT)
+            ),
+            new MachineProcessRecipe(
+                new IngredientPair(IngredientMaterial.COPPER, IngredientType.CABLE),
+
+                new IngredientPair(IngredientMaterial.COPPER, IngredientType.WIRE),
+                new IngredientPair(IngredientMaterial.RUBBER, IngredientType.PLATE)
             )
         );
     }

@@ -6,6 +6,9 @@ public enum IngredientType {
     ORE,
     INGOT,
     RAW,
+    WIRE,
+    PLATE,
+    CABLE,
     ;
 
     public boolean isCompatible(IngredientType inputType) {
