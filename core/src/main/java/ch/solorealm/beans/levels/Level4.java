@@ -6,11 +6,11 @@ import ch.solorealm.beans.machine.*;
 
 public class Level4 extends LevelGenerator {
     public Level4() {
-        super("Level 4", "ingredients/steel_ingot.png",
-            new TableauNode[]{
-                new TableauNode(new MiningMachine(IngredientMaterial.CLAY, IngredientType.RAW), 0),
-                new TableauNode(new FurnaceMachine(), 1),
-                new TableauNode(new CraftingTableMachine(), 2),
+        super("Steal Age", "ingredients/steel_ingot.png",
+            new MachineNode[]{
+                new MiningMachine(IngredientMaterial.CLAY, IngredientType.RAW),
+                new FurnaceMachine(),
+                new CraftingTableMachine(),
             },
             new FoundationNode[]{
                 new FoundationNode(IngredientType.INGOT, IngredientMaterial.FIREBRICK),

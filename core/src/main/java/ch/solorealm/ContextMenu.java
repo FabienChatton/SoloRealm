@@ -70,10 +70,10 @@ public class ContextMenu {
 
         Image divider = getDivider();
 
-        row.add(icon).size(32, 32).padRight(100);
-        row.add(label);
+        row.add(icon).size(32, 32).left();
+        row.add(label).right();
         row.row();
-        row.add(divider).fillX().height(1).colspan(2).padBottom(10).row();
+        row.add(divider).width(250).height(1).colspan(2).padBottom(10);
 
         row.setTouchable(Touchable.enabled);
         row.addListener(new ClickListener() {

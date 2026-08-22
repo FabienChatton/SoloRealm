@@ -10,7 +10,6 @@ import ch.solorealm.beans.ingredient.IngredientPair;
 import ch.solorealm.beans.levels.LevelGenerator;
 import ch.solorealm.beans.levels.LevelStat;
 import ch.solorealm.beans.levels.ShopNode;
-import ch.solorealm.beans.levels.TableauNode;
 import ch.solorealm.beans.machine.*;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -159,8 +158,20 @@ public final class ContextWrk implements ContextUi {
         context.stage.addActor(statTable);
         levelStat = contextLevelEnd.getLevelStat();
 
-        for (TableauNode initialTableau : levelGenerator.initialTableau) {
-            addActorMachineCard(initialTableau.machineNode(), tableau.rootActors[initialTableau.index()]);
+        setLevel(levelGenerator);
+
+        recordScreenshot = true;
+
+        disableSimpleGrid(shop1);
+        disableSimpleGrid(shop2);
+        updateAllGrid();
+    }
+
+    private void setLevel(LevelGenerator levelGenerator) {
+        for (int i = 0; i < levelGenerator.initialTableau.length;) {
+            MachineNode machine = levelGenerator.initialTableau[i];
+            addActorMachineCard(machine, tableau.rootActors[i]);
+            i += machine.edges.length;
         }
 
         FoundationNode[] initialFoundation = levelGenerator.initialFoundation;
@@ -198,12 +209,6 @@ public final class ContextWrk implements ContextUi {
             ActorMachineCard card = addActorShopCard(actorCardData.machineNodeSupplier(), shop.rootActors[widthI]);
             widthI += card.data.edges.length;
         }
-
-        recordScreenshot = true;
-
-        disableSimpleGrid(shop1);
-        disableSimpleGrid(shop2);
-        updateAllGrid();
     }
 
     private InputMultiplexer getInputMultiplexer() {

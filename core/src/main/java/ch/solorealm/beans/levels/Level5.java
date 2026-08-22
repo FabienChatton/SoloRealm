@@ -2,19 +2,16 @@ package ch.solorealm.beans.levels;
 
 import ch.solorealm.beans.ingredient.IngredientMaterial;
 import ch.solorealm.beans.ingredient.IngredientType;
-import ch.solorealm.beans.machine.CraftingTableMachine;
-import ch.solorealm.beans.machine.FoundationNode;
-import ch.solorealm.beans.machine.FurnaceMachine;
-import ch.solorealm.beans.machine.MiningMachine;
+import ch.solorealm.beans.machine.*;
 
 public class Level5 extends LevelGenerator {
     public Level5() {
-        super("Level 5", "ingredients/copper_cable.png",
-            new TableauNode[]{
-                new TableauNode(new CraftingTableMachine(), 0),
-                new TableauNode(new MiningMachine(IngredientMaterial.COPPER), 2),
-                new TableauNode(new FurnaceMachine(), 3),
-                new TableauNode(new MiningMachine(IngredientMaterial.RUBBER), 4),
+        super("Wiring Cable", "ingredients/copper_cable.png",
+            new MachineNode[]{
+                new CraftingTableMachine(),
+                new MiningMachine(IngredientMaterial.COPPER),
+                new FurnaceMachine(),
+                new MiningMachine(IngredientMaterial.RUBBER),
             },
             new FoundationNode[]{
                 new FoundationNode(IngredientType.WIRE, IngredientMaterial.COPPER),
