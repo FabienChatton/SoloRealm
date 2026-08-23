@@ -326,6 +326,12 @@ public final class ContextWrk implements ContextUi {
                 helpWindow.setSize(1, 1);
 
                 helpWindow.pack();
+                if (helpWindow.getHeight() + stageCoords.y > context.stage.getHeight()) {
+                    helpWindow.setY(stageCoords.y - (helpWindow.getHeight() + stageCoords.y - context.stage.getHeight()));
+                }
+                if (helpWindow.getWidth() + stageCoords.x > context.stage.getWidth()) {
+                    helpWindow.setX(stageCoords.x - (helpWindow.getWidth() + stageCoords.x - context.stage.getWidth()));
+                }
                 context.stage.addActor(helpWindow);
             }
         };
