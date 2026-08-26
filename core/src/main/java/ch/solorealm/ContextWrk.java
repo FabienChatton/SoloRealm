@@ -78,7 +78,7 @@ public final class ContextWrk implements ContextUi {
                 @Override
                 public boolean drag(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
                     ActorMachineCard machineCard = (ActorMachineCard) source.getActor();
-                    if (!tableau.data.isDropValide(finalI, machineCard.data)) {
+                    if (!tableau.data.isDropValide(rootActor.data, 0, machineCard.data)) {
                         return false;
                     }
                     rootActor.backgroundImage.setColor(0.62f,0.95f,1f, 1f);

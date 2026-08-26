@@ -162,6 +162,18 @@ public abstract class MachineNode implements GetAssetResource {
         return ret;
     }
 
+
+    public List<MachineNode> getAllChildren() {
+        List<MachineNode> children = new ArrayList<>();
+        children.add(this);
+        for (MachineEdge edge : edges) {
+            if (edge.getChildNode() != null) {
+                children.addAll(edge.getChildNode().getAllChildren());
+            }
+        }
+        return children;
+    }
+
     public abstract String getMachineDisplayName();
 
     @Override

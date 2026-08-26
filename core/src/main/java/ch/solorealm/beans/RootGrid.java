@@ -4,7 +4,6 @@ import ch.solorealm.beans.machine.MachineEdge;
 import ch.solorealm.beans.machine.MachineNode;
 import ch.solorealm.beans.machine.RootMachine;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -15,35 +14,17 @@ public class RootGrid {
     public RootGrid(int nbrOfRoot) {
         this.rootNodes = new RootMachine[nbrOfRoot];
         for (int i = 0; i < nbrOfRoot; i++) {
-            rootNodes[i] = new RootMachine();
+            rootNodes[i] = new RootMachine(this);
         }
     }
 
-    public boolean isDropValide(int rootIndex, MachineNode machine) {
-        int cardWidth = getTotalWidth(machine);
-        for (int i = rootIndex; i < rootIndex + cardWidth; i++) {
-            if (i >= rootNodes.length) {
-                return false;
-            }
-            for (int j = 0; j < rootNodes[i].edges.length; j++) {
-                if (rootNodes[i].edges[j].getChildNode() == machine) {
-                    continue;
-                }
-                if (rootNodes[i].edges[j].getChildNode() != null) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    public boolean isDropValide(MachineNode machine, int dropActorIndex, MachineNode machineToDrop) {
-        if (machine == machineToDrop) return false;
-        int edgePos = getEdgePos(machine.edges[dropActorIndex]);
+    public boolean isDropValide(MachineNode machineFuturParent, int dropActorIndex, MachineNode machineToDrop) {
+        if (machineFuturParent == machineToDrop) return false;
+        int edgePos = getEdgePos(machineFuturParent.edges[dropActorIndex]);
         int cardWith = getTotalWidth(machineToDrop);
         if (edgePos + cardWith > rootNodes.length) return false;
         int height = 0;
-        MachineNode rootParent = machine;
+        MachineNode rootParent = machineFuturParent;
         while(rootParent != null) {
             if (rootParent.getParent() == null) {
                 break;
@@ -52,34 +33,39 @@ public class RootGrid {
             height++;
         }
 
-        List<MachineNode> machineAtHeight = getMachineAtHeight(rootParent, height + 1, cardWith);
-        loop:
-        for (int i = 0; i < machineAtHeight.size() && i < cardWith; i++) {
-            MachineNode machineNode = machineAtHeight.get(i);
-            if (machineNode == machineToDrop) continue;
-            if (machineNode.getParent().getNode() == machine) {
-                for (int j = 0; j < machine.edges.length; j++) {
-                    if (j < dropActorIndex) continue loop;
+        RootGrid dstRootGrid = ((RootMachine) rootParent).rootGrid;
+        List<MachineNode> machineToIgnore = machineToDrop.getAllChildren();
+        while (machineToDrop != null) {
+            MachineNode[] machinesAtHeight = new MachineNode[dstRootGrid.rootNodes.length];
+            for (RootMachine rootNode : dstRootGrid.rootNodes) {
+                getMachineAtHeight(rootNode, machinesAtHeight, height + 1);
+            }
+
+            for (int i = 0; i <= edgePos + cardWith - 1 && i < machinesAtHeight.length; i++) {
+                if (machinesAtHeight[i] != null) {
+                    if (machineToIgnore.contains(machinesAtHeight[i])) continue;
+                    if (machinesAtHeight[i].edges.length + i - 1 >= edgePos) {
+                        return false;
+                    }
                 }
             }
-            return false;
+            machineToDrop = machineToDrop.edges[0].getChildNode();
+            height++;
         }
         return true;
     }
 
-    private List<MachineNode> getMachineAtHeight(MachineNode machineNode, int height, int cardWith) {
+    private void getMachineAtHeight(MachineNode machineNode, MachineNode[] machinesAtHeight, int height) {
         if (machineNode == null) {
-            return List.of();
+            return;
         }
         if (height == 0) {
-            return List.of(machineNode);
+            machinesAtHeight[getEdgePos(machineNode.edges[0])] = machineNode;
         }
-        List<MachineNode> list = new ArrayList<>();
-        for (int i = 0; i < machineNode.edges.length && i < cardWith; i++) {
+        for (int i = 0; i < machineNode.edges.length; i++) {
             MachineEdge edge = machineNode.edges[i];
-            list.addAll(getMachineAtHeight(edge.getChildNode(), height - 1, cardWith - i));
+            getMachineAtHeight(edge.getChildNode(), machinesAtHeight, height - 1);
         }
-        return list;
     }
 
     private int getEdgePos(MachineEdge edge) {
