@@ -41,7 +41,7 @@ public class RootGrid {
                 getMachineAtHeight(rootNode, machinesAtHeight, height + 1);
             }
 
-            for (int i = 0; i <= edgePos + cardWith - 1 && i < machinesAtHeight.length; i++) {
+            for (int i = 0; i <= edgePos + machineToDrop.edges.length - 1 && i < machinesAtHeight.length; i++) {
                 if (machinesAtHeight[i] != null) {
                     if (machineToIgnore.contains(machinesAtHeight[i])) continue;
                     if (machinesAtHeight[i].edges.length + i - 1 >= edgePos) {
