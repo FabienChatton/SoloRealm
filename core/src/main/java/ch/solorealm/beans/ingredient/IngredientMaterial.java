@@ -17,6 +17,7 @@ public enum IngredientMaterial {
     FIREBRICK,
     STEEL,
     RUBBER,
+    MIXED_METAL,
     ;
 
     public boolean isCompatible(IngredientMaterial inputMaterial) {

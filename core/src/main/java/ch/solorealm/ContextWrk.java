@@ -6,6 +6,7 @@ import ch.solorealm.actors.RootGridActor;
 import ch.solorealm.beans.ContextUi;
 import ch.solorealm.beans.RootGrid;
 import ch.solorealm.beans.ingredient.IngredientCard;
+import ch.solorealm.beans.ingredient.IngredientMaterial;
 import ch.solorealm.beans.ingredient.IngredientPair;
 import ch.solorealm.beans.levels.LevelGenerator;
 import ch.solorealm.beans.levels.LevelStat;
@@ -34,6 +35,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -606,7 +608,7 @@ public final class ContextWrk implements ContextUi {
     public void addActorIngredientCard(IngredientCard ingredientCard, MachineEdge edge, boolean inputSlot) {
         ActorMachineCard actorMachineNode = findActorMachineNodeAnyWhere(edge.getNode());
         if (actorMachineNode == null) return;
-        Image ingredientActor = new Image(context.assetManager.get(ingredientCard.getAssetResourcePath(), Texture.class));
+        Image ingredientActor = new Image(getTextureOrAny(ingredientCard));
         ingredientActor.setUserObject(ingredientCard);
         actorMachineNode.ingredientActorCards.add(ingredientActor);
         actorMachineNode.addActorIngredientCard(edge, ingredientActor, inputSlot);
@@ -745,6 +747,16 @@ public final class ContextWrk implements ContextUi {
                 cardChild.setColor(Color.WHITE);
             }
         }
+    }
+
+    private Texture getTextureOrAny(IngredientCard data) {
+        Texture texture;
+        try {
+            texture = context.assetManager.get(data.getAssetResourcePath(), Texture.class);
+        } catch (GdxRuntimeException e) {
+            texture = context.assetManager.get(IngredientCard.getAssetResourcePath(IngredientMaterial.ANY, data.ingredientType));
+        }
+        return texture;
     }
 
     public static String upperFirstLetter(String s) {

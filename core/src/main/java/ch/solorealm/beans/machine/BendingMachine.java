@@ -8,8 +8,8 @@ public class BendingMachine extends MachineNode {
     public BendingMachine() {
         super(EdgeIOSettings.INPUT_OUTPUT,
             new MachineProcessRecipe(
-                new IngredientPair(IngredientMaterial.RUBBER, IngredientType.PLATE),
-                new IngredientPair(IngredientMaterial.RUBBER, IngredientType.INGOT)
+                new IngredientPair(IngredientMaterial.ANY, IngredientType.PLATE),
+                new IngredientPair(IngredientMaterial.ANY, IngredientType.INGOT)
             ));
     }
 
