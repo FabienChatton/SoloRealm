@@ -55,6 +55,7 @@ public final class ContextWrk implements ContextUi {
     private LevelStat levelStat;
     private ContextLevelEnd contextLevelEnd;
     private boolean recordScreenshot;
+    private Class<? extends LevelGenerator> levelGeneratorClass;
 
     public ContextWrk(Context context) {
         this.context = context;
@@ -70,6 +71,8 @@ public final class ContextWrk implements ContextUi {
         context.stage.getActors().clear();
         InputMultiplexer inputMultiplexer = getInputMultiplexer();
         Gdx.input.setInputProcessor(inputMultiplexer);
+
+        levelGeneratorClass = levelGenerator.getClass();
 
         tableau = new RootGridActor(new RootGrid(6), context.skin, context.assetManager.get("cards/empty_root.png"));
         rootGridActors.add(tableau);
@@ -222,6 +225,8 @@ public final class ContextWrk implements ContextUi {
                     context.stage.addAction(Actions.sequence(context.contextMenu.fadeToMenu()));
                     Gdx.input.setInputProcessor(context.stage);
                     return true;
+                } else if (keycode == Input.Keys.F1) {
+                    reloadLevel();
                 }
                 return false;
             }
@@ -338,6 +343,15 @@ public final class ContextWrk implements ContextUi {
             }
         };
         return new InputMultiplexer(inputAdapter, context.stage);
+    }
+
+    private void reloadLevel() {
+        try {
+            LevelGenerator levelGenerator = levelGeneratorClass.getConstructor().newInstance();
+            createGrid(levelGenerator);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     static void setBlackFadeBackground(Table table) {
