@@ -18,6 +18,8 @@ public enum IngredientMaterial {
     STEEL,
     RUBBER,
     MIXED_METAL,
+    MOTOR,
+    CONVEYOR,
     ;
 
     public boolean isCompatible(IngredientMaterial inputMaterial) {

@@ -264,8 +264,7 @@ public final class ContextWrk implements ContextUi {
                                 Label label = new Label(FoundationNode.getMachineDisplayName(machineProcessRecipe.output().material(), machineProcessRecipe.output().type()), context.skin);
                                 label.setColor(Color.BLACK);
                                 row.add(label).right().expandX().padLeft(8);
-                                String assetResourcePath = IngredientCard.getAssetResourcePath(machineProcessRecipe.output().material(), machineProcessRecipe.output().type());
-                                Image img = new Image(context.assetManager.get(assetResourcePath, Texture.class));
+                                Image img = new Image(getTextureOrAny(machineProcessRecipe.output()));
                                 row.add(img).right().size(32).padLeft(8);
                             }
                             helpContent.add(row).expand().fill().row();
@@ -278,8 +277,7 @@ public final class ContextWrk implements ContextUi {
                             label.setColor(Color.BLACK);
                             table.add(label);
 
-                            String assetResourcePath = IngredientCard.getAssetResourcePath(card.ingredientMaterial, card.ingredientType);
-                            Image image = new Image(context.assetManager.get(assetResourcePath, Texture.class));
+                            Image image = new Image(getTextureOrAny(card));
                             table.add(image).size(32).padLeft(8);
 
                             addHelpWindow(table, coords);
@@ -769,6 +767,18 @@ public final class ContextWrk implements ContextUi {
             texture = context.assetManager.get(data.getAssetResourcePath(), Texture.class);
         } catch (GdxRuntimeException e) {
             texture = context.assetManager.get(IngredientCard.getAssetResourcePath(IngredientMaterial.ANY, data.ingredientType));
+        }
+        return texture;
+    }
+
+    private Texture getTextureOrAny(IngredientPair data) {
+        Texture texture;
+        String assetResourcePath = IngredientCard.getAssetResourcePath(data.material(), data.type());
+        try {
+            texture = context.assetManager.get(assetResourcePath, Texture.class);
+        } catch (GdxRuntimeException e) {
+            Gdx.app.debug("Mising Texture", "The texture \"" + assetResourcePath + "\" is missing.");
+            texture = context.assetManager.get(IngredientCard.getAssetResourcePath(IngredientMaterial.ANY, data.type()));
         }
         return texture;
     }

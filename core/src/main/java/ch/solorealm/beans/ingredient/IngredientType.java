@@ -9,6 +9,7 @@ public enum IngredientType {
     WIRE,
     PLATE,
     CABLE,
+    ROD,
     ;
 
     public boolean isCompatible(IngredientType inputType) {
