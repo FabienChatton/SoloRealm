@@ -3,6 +3,7 @@ package ch.solorealm;
 import ch.solorealm.actors.ActorMachineCard;
 import ch.solorealm.actors.RootActor;
 import ch.solorealm.actors.RootGridActor;
+import ch.solorealm.actors.ShowHelp;
 import ch.solorealm.beans.ContextUi;
 import ch.solorealm.beans.RootGrid;
 import ch.solorealm.beans.ingredient.IngredientCard;
@@ -23,6 +24,7 @@ import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
@@ -42,7 +44,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public final class ContextWrk implements ContextUi {
-    private final Context context;
+    public final Context context;
     private final DragAndDrop dndMachine;
     private final DragAndDrop dndIngredient;
     private RootGridActor tableau;
@@ -232,63 +234,6 @@ public final class ContextWrk implements ContextUi {
             }
 
             @Override
-            public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-                // left click
-                if (button == 1) {
-                    Vector2 coords = new Vector2(screenX, screenY);
-                    context.stage.screenToStageCoordinates(coords);
-                    Actor hit = context.stage.hit(coords.x, coords.y, true);
-                    if (hit == null) return false;
-                    Table helpContent = new Table();
-                    if (hit.getParent() instanceof ActorMachineCard card) {
-                        for (MachineProcessRecipe machineProcessRecipe : card.data.machineProcessRecipes) {
-                            Table row = new Table();
-                            int i = 0;
-                            Table inputTable = new Table();
-                            for (IngredientPair ingredientPair : machineProcessRecipe.input()) {
-                                Label label = new Label(FoundationNode.getMachineDisplayName(ingredientPair.material(), ingredientPair.type()), context.skin);
-                                label.setColor(Color.BLACK);
-                                inputTable.add(label);
-                                String assetResourcePath = IngredientCard.getAssetResourcePath(ingredientPair.material(), ingredientPair.type());
-                                Image img = new Image(context.assetManager.get(assetResourcePath, Texture.class));
-                                inputTable.add(img).size(32).padLeft(8);
-                                if (++i != machineProcessRecipe.input().length) {
-                                    inputTable.row();
-                                }
-                            }
-                            row.add(inputTable).expandX().left().padTop(10);
-                            if (machineProcessRecipe.output() != null) {
-                                Label arrowLabel = new Label("->", context.skin);
-                                arrowLabel.setColor(Color.BLACK);
-                                row.add(arrowLabel).padLeft(8);
-                                Label label = new Label(FoundationNode.getMachineDisplayName(machineProcessRecipe.output().material(), machineProcessRecipe.output().type()), context.skin);
-                                label.setColor(Color.BLACK);
-                                row.add(label).right().expandX().padLeft(8);
-                                Image img = new Image(getTextureOrAny(machineProcessRecipe.output()));
-                                row.add(img).right().size(32).padLeft(8);
-                            }
-                            helpContent.add(row).expand().fill().row();
-                        }
-                        addHelpWindow(helpContent, coords);
-                    } else if (hit instanceof Image img) {
-                        if (img.getUserObject() instanceof IngredientCard card) {
-                            Table table = new Table();
-                            Label label = new Label(FoundationNode.getMachineDisplayName(card.ingredientMaterial, card.ingredientType), context.skin);
-                            label.setColor(Color.BLACK);
-                            table.add(label);
-
-                            Image image = new Image(getTextureOrAny(card));
-                            table.add(image).size(32).padLeft(8);
-
-                            addHelpWindow(table, coords);
-                        }
-                    }
-                }
-
-                return false;
-            }
-
-            @Override
             public boolean touchUp(int screenX, int screenY, int pointer, int button) {
                 if (button == 1) {
                     if (helpWindow != null) {
@@ -298,49 +243,103 @@ public final class ContextWrk implements ContextUi {
                 }
                 return false;
             }
-
-            @Override
-            public boolean touchDragged(int screenX, int screenY, int pointer) {
-                if (Gdx.input.isButtonPressed(1)) {
-                    if (helpWindow != null) {
-                        helpWindow.remove();
-                        touchDown(screenX, screenY, 0, 1);
-                    }
-                }
-                return false;
-            }
-
-            private void addHelpWindow(Actor helpContent, Vector2 stageCoords) {
-                helpWindow = new Table(context.skin);
-                helpWindow.add(helpContent);
-                helpWindow.setPosition(stageCoords.x, stageCoords.y);
-
-                Pixmap pixmap = new Pixmap(3, 3, Pixmap.Format.RGBA8888);
-                pixmap.setColor(Color.BLACK);
-                pixmap.fill();
-
-                pixmap.setColor(new Color(0.8627f, 0.8039f, 0.6745f, 1f));
-                pixmap.fillRectangle(1, 1, 1, 1);
-                Texture texture = new Texture(pixmap);
-
-                NinePatchDrawable backgroundDrawable = new NinePatchDrawable(new NinePatch(texture, 1, 1, 1, 1));
-
-                helpWindow.setBackground(backgroundDrawable);
-
-                helpWindow.pad(10f);
-                helpWindow.setSize(1, 1);
-
-                helpWindow.pack();
-                if (helpWindow.getHeight() + stageCoords.y > context.stage.getHeight()) {
-                    helpWindow.setY(stageCoords.y - (helpWindow.getHeight() + stageCoords.y - context.stage.getHeight()));
-                }
-                if (helpWindow.getWidth() + stageCoords.x > context.stage.getWidth()) {
-                    helpWindow.setX(stageCoords.x - (helpWindow.getWidth() + stageCoords.x - context.stage.getWidth()));
-                }
-                context.stage.addActor(helpWindow);
-            }
         };
         return new InputMultiplexer(inputAdapter, context.stage);
+    }
+
+    public void showHelpWindow(IngredientCard card) {
+        Table table = new Table();
+        Label label = new Label(FoundationNode.getMachineDisplayName(card.ingredientMaterial, card.ingredientType), context.skin);
+        label.setColor(Color.BLACK);
+        table.add(label);
+
+        Image image = new Image(getTextureOrAny(card));
+        table.add(image).size(32).padLeft(8);
+
+        addHelpWindow(table);
+    }
+
+    public void showHelpWindow(ActorMachineCard card) {
+        Table helpContent = new Table();
+        for (MachineProcessRecipe machineProcessRecipe : card.data.machineProcessRecipes) {
+            Table row = new Table();
+            int i = 0;
+            Table inputTable = new Table();
+            for (IngredientPair ingredientPair : machineProcessRecipe.input()) {
+                Label label = new Label(FoundationNode.getMachineDisplayName(ingredientPair.material(), ingredientPair.type()), context.skin);
+                label.setColor(Color.BLACK);
+                inputTable.add(label);
+                String assetResourcePath = IngredientCard.getAssetResourcePath(ingredientPair.material(), ingredientPair.type());
+                Image img = new Image(context.assetManager.get(assetResourcePath, Texture.class));
+                inputTable.add(img).size(32).padLeft(8);
+                if (++i != machineProcessRecipe.input().length) {
+                    inputTable.row();
+                }
+            }
+            row.add(inputTable).expandX().left().padTop(10);
+            if (machineProcessRecipe.output() != null) {
+                Label arrowLabel = new Label("->", context.skin);
+                arrowLabel.setColor(Color.BLACK);
+                row.add(arrowLabel).padLeft(8);
+                Label label = new Label(FoundationNode.getMachineDisplayName(machineProcessRecipe.output().material(), machineProcessRecipe.output().type()), context.skin);
+                label.setColor(Color.BLACK);
+                row.add(label).right().expandX().padLeft(8);
+                Image img = new Image(getTextureOrAny(machineProcessRecipe.output()));
+                row.add(img).right().size(32).padLeft(8);
+            }
+            helpContent.add(row).expand().fill().row();
+        }
+        addHelpWindow(helpContent);
+    }
+
+    public void removeHelpWindow() {
+        helpWindow.remove();
+    }
+
+    private void addHelpWindow(Actor helpContent) {
+        int screenX = Gdx.input.getX();
+        int screenY = Gdx.input.getY();
+        Vector2 stageCoords = new Vector2(screenX, screenY);
+        context.stage.screenToStageCoordinates(stageCoords);
+        helpWindow = new Table(context.skin);
+        helpWindow.add(helpContent);
+        helpWindow.setPosition(stageCoords.x, stageCoords.y);
+
+        Pixmap pixmap = new Pixmap(3, 3, Pixmap.Format.RGBA8888);
+        pixmap.setColor(Color.BLACK);
+        pixmap.fill();
+
+        pixmap.setColor(new Color(0.8627f, 0.8039f, 0.6745f, 1f));
+        pixmap.fillRectangle(1, 1, 1, 1);
+        Texture texture = new Texture(pixmap);
+
+        NinePatchDrawable backgroundDrawable = new NinePatchDrawable(new NinePatch(texture, 1, 1, 1, 1));
+
+        helpWindow.setBackground(backgroundDrawable);
+
+        helpWindow.pad(10f);
+        helpWindow.setSize(1, 1);
+
+        helpWindow.pack();
+        if (helpWindow.getHeight() + stageCoords.y > context.stage.getHeight()) {
+            helpWindow.setY(stageCoords.y - (helpWindow.getHeight() + stageCoords.y - context.stage.getHeight()));
+        }
+        if (helpWindow.getWidth() + stageCoords.x > context.stage.getWidth()) {
+            helpWindow.setX(stageCoords.x - (helpWindow.getWidth() + stageCoords.x - context.stage.getWidth()));
+        }
+        context.stage.addActor(helpWindow);
+    }
+
+    public InputListener getHelpWindowListener(ShowHelp card) {
+        return new InputListener() {
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                if (button == 1) {
+                    card.showHelp();
+                }
+                return true;
+            }
+        };
     }
 
     private void reloadLevel() {
@@ -374,7 +373,7 @@ public final class ContextWrk implements ContextUi {
     }
 
     public void addActorMachineCard(MachineNode data, RootActor parent) {
-        ActorMachineCard card = new ActorMachineCard(context.skin, data,
+        ActorMachineCard card = new ActorMachineCard(this, data,
             context.assetManager.get(data.getAssetResourcePath()),
             context.assetManager.get("cards/empty_card.png"),
             context.assetManager.get("machines/Grid_Overclocker_Upgrade.png"));
@@ -391,7 +390,7 @@ public final class ContextWrk implements ContextUi {
 
     public void addActorFoundationCard(MachineNode data, RootGridActor foundation, int index, Consumer<ActorMachineCard> onValidatedFondation) {
         RootActor parent = foundation.rootActors[index];
-        ActorMachineCard card = new ActorMachineCard(context.skin, data,
+        ActorMachineCard card = new ActorMachineCard(this, data,
             context.assetManager.get(data.getAssetResourcePath()),
             context.assetManager.get("cards/empty_card.png"),
             context.assetManager.get("machines/Grid_Overclocker_Upgrade.png"));
@@ -403,7 +402,7 @@ public final class ContextWrk implements ContextUi {
 
     private void addActorTrashCard(TrashMachine data, RootGridActor trash, int index) {
         RootActor parent = trash.rootActors[index];
-        ActorMachineCard card = new ActorMachineCard(context.skin, data,
+        ActorMachineCard card = new ActorMachineCard(this, data,
             context.assetManager.get(data.getAssetResourcePath()),
             context.assetManager.get("cards/empty_card.png"),
             context.assetManager.get("machines/Grid_Overclocker_Upgrade.png"));
@@ -439,7 +438,7 @@ public final class ContextWrk implements ContextUi {
     public ActorMachineCard addActorShopCard(Supplier<MachineNode> machineNodeConstructor, RootActor parent) {
         MachineNode originalData = machineNodeConstructor.get();
 
-        ActorMachineCard card = new ActorMachineCard(context.skin, originalData,
+        ActorMachineCard card = new ActorMachineCard(this, originalData,
             context.assetManager.get(originalData.getAssetResourcePath()),
             context.assetManager.get("cards/empty_card.png"),
             context.assetManager.get("machines/Grid_Overclocker_Upgrade.png"));
@@ -632,6 +631,12 @@ public final class ContextWrk implements ContextUi {
         scaleToAction.setScale(1);
         scaleToAction.setDuration(0.2f);
         ingredientActor.addAction(scaleToAction);
+        ingredientActor.addListener(getHelpWindowListener(new ShowHelp() {
+            @Override
+            public void showHelp() {
+                showHelpWindow(ingredientCard);
+            }
+        }));
         dndIngredient.addSource(new DragAndDrop.Source(ingredientActor) {
             private final Vector2 originalPos = new Vector2();
             private final Vector2 deltaPos = new Vector2();

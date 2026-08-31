@@ -1,5 +1,6 @@
 package ch.solorealm.actors;
 
+import ch.solorealm.ContextWrk;
 import ch.solorealm.beans.ingredient.IngredientCard;
 import ch.solorealm.beans.machine.EdgeIOSettings;
 import ch.solorealm.beans.machine.MachineEdge;
@@ -12,14 +13,14 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.utils.Align;
 
 import java.util.*;
 
-public class ActorMachineCard extends Table implements GetCardChildren {
+public class ActorMachineCard extends Table implements GetCardChildren, ShowHelp {
+    private final ContextWrk contextWrk;
     public final MachineNode data;
     public final Actor[] edgeDropActor;
     public final Map<MachineEdge, Actor[]> edgeActorMap;
@@ -32,8 +33,9 @@ public class ActorMachineCard extends Table implements GetCardChildren {
     public boolean dndIngredientDst;
     private static final float SCALE_FACTOR = 1.5f;
 
-    public ActorMachineCard(Skin skin, MachineNode data, Texture iconTexture, Texture backgroundTexture,
+    public ActorMachineCard(ContextWrk contextWrk, MachineNode data, Texture iconTexture, Texture backgroundTexture,
                             Texture arrowTexture) {
+        this.contextWrk = contextWrk;
         this.data = data;
         this.icon = new Image(iconTexture);
         this.cardActorChild = new ArrayList<>();
@@ -88,7 +90,7 @@ public class ActorMachineCard extends Table implements GetCardChildren {
         Table contentTable = new Table();
         contentTable.add(edgesRowTable).expandX().fillX().row();
 
-        Label machineNameLabel = new Label(data.getMachineDisplayName(), skin, "window");
+        Label machineNameLabel = new Label(data.getMachineDisplayName(), contextWrk.context.skin, "window");
         machineNameLabel.setColor(Color.BLACK);
         machineNameLabel.setFontScale(SCALE_FACTOR);
         String displayName = data.getMachineDisplayName();
@@ -110,6 +112,8 @@ public class ActorMachineCard extends Table implements GetCardChildren {
             addActor(dropEdgeActor);
             edgeDropActor[i] = dropEdgeActor;
         }
+
+        addListener(contextWrk.getHelpWindowListener(this));
     }
 
     public void setParentActor(RootActor rootActor) {
@@ -209,5 +213,10 @@ public class ActorMachineCard extends Table implements GetCardChildren {
             }
             icon.setColor(color);
         }
+    }
+
+    @Override
+    public void showHelp() {
+        contextWrk.showHelpWindow(this);
     }
 }
