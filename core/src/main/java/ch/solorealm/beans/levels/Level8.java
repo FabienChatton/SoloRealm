@@ -6,7 +6,7 @@ import ch.solorealm.beans.machine.*;
 
 public class Level8 extends LevelGenerator {
     public Level8() {
-        super("Level 8", "ingredients/mixed_metal_ingot.png",
+        super("Conveyor Belt", "ingredients/conveyor_raw.png",
             new MachineNode[]{
                 new MiningMachine(IngredientMaterial.COPPER),
                 new MiningMachine(IngredientMaterial.RUBBER),
