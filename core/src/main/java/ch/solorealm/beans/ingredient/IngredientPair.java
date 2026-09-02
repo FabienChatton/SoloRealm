@@ -1,6 +1,10 @@
 package ch.solorealm.beans.ingredient;
 
 public record IngredientPair(IngredientMaterial material, IngredientType type) {
+    public static IngredientPair from(IngredientCard card) {
+        return new IngredientPair(card.ingredientMaterial, card.ingredientType);
+    }
+
     @Override
     public String toString() {
         return formatString(material, type);
@@ -9,7 +13,7 @@ public record IngredientPair(IngredientMaterial material, IngredientType type) {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof IngredientPair(IngredientMaterial material1, IngredientType type1)) {
-            return type1 == type && material1 == material;
+            return type.isCompatible(type1) && material.isCompatible(material1);
         }
         return false;
     }

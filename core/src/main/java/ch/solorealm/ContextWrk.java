@@ -247,15 +247,15 @@ public final class ContextWrk implements ContextUi {
         return new InputMultiplexer(inputAdapter, context.stage);
     }
 
-    public void showHelpWindow(IngredientCard card) {
+    public void showHelpWindow(IngredientPair pair) {
         Table table = new Table();
-        Label label = new Label(FoundationNode.getMachineDisplayName(card.ingredientMaterial, card.ingredientType), context.skin);
+        Label label = new Label(FoundationNode.getMachineDisplayName(pair.material(), pair.type()), context.skin);
         label.setColor(Color.BLACK);
         table.add(label);
 
-        Image image = new Image(getTextureOrAny(card));
-        table.add(image).size(32).padLeft(8);
-
+        Image image = new Image(getTextureOrAny(pair));
+        table.add(image).size(32).padLeft(8).row();
+        Map<Class<MachineNode>, Collection<MachineProcessRecipe>> matchRecipe = context.recipeWrk.getMatchRecipe(pair);
         addHelpWindow(table);
     }
 
@@ -388,12 +388,13 @@ public final class ContextWrk implements ContextUi {
         takeScreenShot();
     }
 
-    public void addActorFoundationCard(MachineNode data, RootGridActor foundation, int index, Consumer<ActorMachineCard> onValidatedFondation) {
+    public void addActorFoundationCard(FoundationNode data, RootGridActor foundation, int index, Consumer<ActorMachineCard> onValidatedFondation) {
         RootActor parent = foundation.rootActors[index];
         ActorMachineCard card = new ActorMachineCard(this, data,
             context.assetManager.get(data.getAssetResourcePath()),
             context.assetManager.get("cards/empty_card.png"),
             context.assetManager.get("machines/Grid_Overclocker_Upgrade.png"));
+        card.setShowHelp(() -> showHelpWindow(new IngredientPair(data.ingredientMaterial, data.ingredientType)));
         card.setParentActor(parent);
         context.stage.addActor(card);
 
@@ -631,12 +632,7 @@ public final class ContextWrk implements ContextUi {
         scaleToAction.setScale(1);
         scaleToAction.setDuration(0.2f);
         ingredientActor.addAction(scaleToAction);
-        ingredientActor.addListener(getHelpWindowListener(new ShowHelp() {
-            @Override
-            public void showHelp() {
-                showHelpWindow(ingredientCard);
-            }
-        }));
+        ingredientActor.addListener(getHelpWindowListener(() -> showHelpWindow(IngredientPair.from(ingredientCard))));
         dndIngredient.addSource(new DragAndDrop.Source(ingredientActor) {
             private final Vector2 originalPos = new Vector2();
             private final Vector2 deltaPos = new Vector2();

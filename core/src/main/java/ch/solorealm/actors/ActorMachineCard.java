@@ -32,6 +32,7 @@ public class ActorMachineCard extends Table implements GetCardChildren, ShowHelp
     private Actor edgeParentActor;
     public boolean dndIngredientDst;
     private static final float SCALE_FACTOR = 1.5f;
+    private ShowHelp showHelp;
 
     public ActorMachineCard(ContextWrk contextWrk, MachineNode data, Texture iconTexture, Texture backgroundTexture,
                             Texture arrowTexture) {
@@ -113,6 +114,7 @@ public class ActorMachineCard extends Table implements GetCardChildren, ShowHelp
             edgeDropActor[i] = dropEdgeActor;
         }
 
+        setShowHelp(() -> contextWrk.showHelpWindow(this));
         addListener(contextWrk.getHelpWindowListener(this));
     }
 
@@ -215,8 +217,12 @@ public class ActorMachineCard extends Table implements GetCardChildren, ShowHelp
         }
     }
 
+    public void setShowHelp(ShowHelp showHelp) {
+        this.showHelp = showHelp;
+    }
+
     @Override
     public void showHelp() {
-        contextWrk.showHelpWindow(this);
+        showHelp.showHelp();
     }
 }

@@ -20,8 +20,10 @@ public class Context implements Disposable {
     public final ContextWrk contextWrk;
     public final SoundsManager soundsManager;
     public final ContextMenu contextMenu;
+    public final RecipeWrk recipeWrk;
 
     public Context(Stage stage) {
+        recipeWrk = new RecipeWrk();
         assetManager = new AssetManager();
         skin = new Skin(Gdx.files.internal("ui/uiskin.json"));
         this.stage = stage;
@@ -32,6 +34,11 @@ public class Context implements Disposable {
 
     public void initializeGame() {
         loadAsset();
+        try {
+            recipeWrk.loadMachines();
+        } catch (Exception e) {
+            Gdx.app.log("Recipe", "Fail to load machines", e);
+        }
         contextMenu.createMenu();
     }
 
