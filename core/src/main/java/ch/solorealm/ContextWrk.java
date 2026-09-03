@@ -39,6 +39,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -256,44 +257,71 @@ public final class ContextWrk implements ContextUi {
         Image image = new Image(getTextureOrAny(pair));
         table.add(image).size(32).padLeft(8).row();
         Map<Class<MachineNode>, Collection<MachineProcessRecipe>> matchRecipe = context.recipeWrk.getMatchRecipe(pair);
+        for (Class<MachineNode> machineNodeClass : matchRecipe.keySet()) {
+            MachineNode machineNode;
+            try {
+                machineNode = machineNodeClass.getConstructor().newInstance();
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                     NoSuchMethodException e) {
+                Gdx.app.log("Recipe", "Can not load machine node new instance.");
+                continue;
+            }
+            table.add(ContextMenu.getDivider()).fillX().height(1).colspan(2).padBottom(20).row();
+            Label machineName = new Label(machineNode.getMachineDisplayName(), context.skin);
+            machineName.setColor(Color.BLACK);
+            table.add(machineName);
+            Image machineImage = new Image(context.assetManager.get(machineNode.getAssetResourcePath(), Texture.class));
+            table.add(machineImage).size(32).row();
+            for (MachineProcessRecipe machineProcessRecipe : matchRecipe.get(machineNodeClass)) {
+                addMachineProcessHelp(machineProcessRecipe, table);
+            }
+            table.add(ContextMenu.getDivider()).fillX().height(1).colspan(2).row();
+        }
         addHelpWindow(table);
     }
 
     public void showHelpWindow(ActorMachineCard card) {
         Table helpContent = new Table();
+        boolean addDivider = card.data.machineProcessRecipes.size() > 1;
         for (MachineProcessRecipe machineProcessRecipe : card.data.machineProcessRecipes) {
-            Table row = new Table();
-            int i = 0;
-            Table inputTable = new Table();
-            for (IngredientPair ingredientPair : machineProcessRecipe.input()) {
-                Label label = new Label(FoundationNode.getMachineDisplayName(ingredientPair.material(), ingredientPair.type()), context.skin);
-                label.setColor(Color.BLACK);
-                inputTable.add(label);
-                String assetResourcePath = IngredientCard.getAssetResourcePath(ingredientPair.material(), ingredientPair.type());
-                Image img = new Image(context.assetManager.get(assetResourcePath, Texture.class));
-                inputTable.add(img).size(32).padLeft(8);
-                if (++i != machineProcessRecipe.input().length) {
-                    inputTable.row();
-                }
+            if (addDivider) {
+                helpContent.add(ContextMenu.getDivider()).fillX().height(1).colspan(2).row();
             }
-            row.add(inputTable).expandX().left().padTop(10);
-            if (machineProcessRecipe.output() != null) {
-                Label arrowLabel = new Label("->", context.skin);
-                arrowLabel.setColor(Color.BLACK);
-                row.add(arrowLabel).padLeft(8);
-                Label label = new Label(FoundationNode.getMachineDisplayName(machineProcessRecipe.output().material(), machineProcessRecipe.output().type()), context.skin);
-                label.setColor(Color.BLACK);
-                row.add(label).right().expandX().padLeft(8);
-                Image img = new Image(getTextureOrAny(machineProcessRecipe.output()));
-                row.add(img).right().size(32).padLeft(8);
+            addMachineProcessHelp(machineProcessRecipe, helpContent);
+            if (addDivider) {
+                helpContent.add(ContextMenu.getDivider()).fillX().height(1).colspan(2).row();
             }
-            helpContent.add(row).expand().fill().row();
         }
         addHelpWindow(helpContent);
     }
 
-    public void removeHelpWindow() {
-        helpWindow.remove();
+    private void addMachineProcessHelp(MachineProcessRecipe machineProcessRecipe, Table helpContent) {
+        Table row = new Table();
+        int i = 0;
+        Table inputTable = new Table();
+        for (IngredientPair ingredientPair : machineProcessRecipe.input()) {
+            Label label = new Label(FoundationNode.getMachineDisplayName(ingredientPair.material(), ingredientPair.type()), context.skin);
+            label.setColor(Color.BLACK);
+            inputTable.add(label);
+            String assetResourcePath = IngredientCard.getAssetResourcePath(ingredientPair.material(), ingredientPair.type());
+            Image img = new Image(context.assetManager.get(assetResourcePath, Texture.class));
+            inputTable.add(img).size(32).padLeft(8);
+            if (++i != machineProcessRecipe.input().length) {
+                inputTable.row();
+            }
+        }
+        row.add(inputTable).expandX().left();
+        if (machineProcessRecipe.output() != null) {
+            Label arrowLabel = new Label("->", context.skin);
+            arrowLabel.setColor(Color.BLACK);
+            row.add(arrowLabel).padLeft(8);
+            Label label = new Label(FoundationNode.getMachineDisplayName(machineProcessRecipe.output().material(), machineProcessRecipe.output().type()), context.skin);
+            label.setColor(Color.BLACK);
+            row.add(label).right().expandX().padLeft(8);
+            Image img = new Image(getTextureOrAny(machineProcessRecipe.output()));
+            row.add(img).right().size(32).padLeft(8);
+        }
+        helpContent.add(row).expand().fill().colspan(2).row();
     }
 
     private void addHelpWindow(Actor helpContent) {

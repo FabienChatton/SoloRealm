@@ -142,7 +142,7 @@ public class ContextMenu {
             ));
     }
 
-    private static Image getDivider() {
+    public static Image getDivider() {
         Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
         pixmap.setColor(Color.GRAY);
         pixmap.fill();
