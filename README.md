@@ -79,7 +79,8 @@ Recipes can have an "any" wild card, like in the furnace recipe.
 
 ![ingredient_hint.png](images/ingredient_hint.png)
 
-Right-clicking is also available with ingredients, showing what ingredient is this.
+Right-clicking is also available with ingredients, showing what ingredient is this
+and in which process this ingredient can be obtained.
 
 ### Exiting a level
 
